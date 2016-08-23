@@ -1,0 +1,74 @@
+=pod
+
+=head1 NAME
+
+    bugsnag-dsym-upload - Uploads dSYMs to Bugsnag
+
+=head1 SYNOPSIS
+
+    bugsnag-dsym-upload [--verbose] [--symbol-maps MAP_DIR] dSYMS_DIR
+    bugsnag-dsym-upload --help
+
+=head1 DESCRIPTION
+
+Given a directory, bugsnag-dsym-upload uploads any *.dSYM bundles with the
+directory to the Bugsnag Upload API (https://upload.bugsnag.com). As a
+pre-upload step, bitcode symbol maps can be combined with dSYM files to ensure
+symbols are sent for bitcode-enabled binaries.
+
+=head1 DEPENDENCIES
+
+=over 4
+
+=item I<cURL>
+
+Required. cURL uploads the dSYM DWARF data to the Bugsnag Upload API as form
+data.
+
+=item I<dsymutil>
+
+Optional, only required for --symbol-maps. dsymutil handles replacing instances
+of obsfucated symbols in bitcode-enabled dSYM files with the original symbols.
+
+=item I<dwarfdump>
+
+Required. dwarfdump validates that the dSYM DWARF file corresponds to an
+application or framework.
+
+=back
+
+=head1 OPTIONS
+
+=over 4
+
+=item I<-h>, --help
+
+Display the help documentation for this command
+
+=item --symbol-maps MAP_DIR
+
+Path to a directory of bitcode symbol maps. When specified, the dSYM DWARF data
+will be updated with symbols prior to upload. Requires dsymutil.
+
+=item I<-s>, --silent
+
+Silence all script output aside from errors
+
+=item I<-v>, --verbose
+
+Print verbose logging output during execution
+
+=back
+
+=head1 SEE ALSO
+
+I<dsymutil>(1), I<curl>(1), I<dwarfdump>(1)
+
+https://docs.bugsnag.com/api/dsym-upload/
+
+=head1 COPYRIGHT
+
+Copyright (c) 2016 Bugsnag, Inc. bugsnag-dsym-upload is licensed under the MIT
+license as specified in the included file LICENSE.txt.
+
+=cut

@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+#
+#   Given a directory, uploads any *.dSYM bundles with the directory to
+#   Bugsnag. As a pre-upload step, bitcode symbol maps can be combined with
+#   dSYM files to ensure symbols are sent for bitcode-enabled binaries.
+
+function print_usage() {
+    echo "Usage: $0 [--symbol-maps DIR] dSYMS_DIR"
+    echo
+    echo "-h, --help        Displays this message"
+    echo "-v, --verbose     Print verbose logging output during execution"
+    echo "--symbol-maps DIR Path to a directory of bitcode symbol maps. The"
+    echo "                  dSYM files will be restored with symbols prior to"
+    echo "                  upload. Requires dsymutil."
+    echo
+    echo "dSYMS_DIR         A directory containing *.dSYM bundles to upload"
+}
+
+function exit_with_usage() {
+    echo $1
+    echo
+    print_usage
+    exit 1
+}
+
+function log() {
+    if [[ $silent != 1 ]]; then
+        echo $@
+    fi
+}
+
+function log_verbose() {
+    if [[ $verbose == 1 ]]; then
+        log $@
+    fi
+}
+
+unset symbol_maps
+unset dsym_dir
+unset verbose
+unset silent
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help)
+            print_usage
+            exit 0;;
+        -s|--silent)
+            silent=1
+            shift;;
+        -v|--verbose)
+            verbose=1
+            shift;;
+        --symbol-maps)
+            symbol_maps=$2
+            shift
+            shift;;
+        -*)
+            exit_with_usage "Invalid parameter provided: $1";;
+        *)
+            dsym_dir=$1
+            break;;
+    esac
+done
+
+if [[ ! -z $symbol_maps ]]; then
+    if [[ ! -d $symbol_maps ]]; then
+        exit_with_usage "Bitcode symbol map parameter is not a directory"
+    elif [[ ! -x "$(command -v dsymutil 2>/dev/null)" ]]; then
+        exit_with_usage "dsymutil command not found."
+    fi
+fi
+if [[ -z $dsym_dir ]]; then
+    exit_with_usage "No dSYM directory provided"
+fi
+if [[ ! -d $dsym_dir ]]; then
+    exit_with_usage "'$dsym_dir' is not a directory"
+fi
+
+for dsym in $dsym_dir/*.dSYM; do
+    log_verbose "Preparing to upload $dsym"
+
+    if [[ -d $symbol_maps ]]; then
+        log_verbose "Updating file with bitcode symbol maps in $symbol_maps"
+        dsymutil $dsym --symbol-map $symbol_maps
+    fi
+
+    dwarf_data=$dsym/Contents/Resources/DWARF
+    if [[ ! -d $dwarf_data ]]; then
+        log_verbose "Skipping dSYM missing DWARF data: $dsym"
+        continue
+    fi
+    for file in $dwarf_data/*; do
+        uuid=$(dwarfdump -u $file)
+        if [[ $uuid == UUID* ]]; then
+            log Uploading $uuid
+            curl https://upload.bugsnag.com -F dsym=@$file
+            log
+        else
+            log_verbose "Skipping file without UUID: $file"
+        fi
+    done
+done

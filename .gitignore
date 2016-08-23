@@ -1,0 +1,3 @@
+tools/fastlane-plugin/bin/bugsnag-dsym-upload
+tools/fastlane-plugin/Gemfile.lock
+*.gem
