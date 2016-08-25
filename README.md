@@ -1,9 +1,9 @@
-# bugsnag-dsym-upload
+# bugsnag-upload
 
-Commands for patching uploading debug symbol files (dSYM) DWARF data to Bugsnag.
-Suitable for one-off uploads as well as CI integration.
+Commands for uploading files to Bugsnag via the Bugsnag Upload APIs
 
-## Features
+
+## Current Features
 
 * Uploads dSYM files in bulk
 * Converts bitcode-enabled symbol files stripped of symbol names into full files
