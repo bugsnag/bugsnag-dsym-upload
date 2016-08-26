@@ -21,7 +21,7 @@ Install via the [Homebrew](https://brew.sh) formula:
 
 ```
 brew install --HEAD \
-  https://raw.github.com/bugsnag/dsym-upload/master/tools/homebrew/bugsnag-dsym-upload.rb
+  https://raw.github.com/bugsnag/bugsnag-upload/master/tools/homebrew/bugsnag-dsym-upload.rb
 ```
 
 ## [Usage](man/bugsnag-dsym-upload.pod)
