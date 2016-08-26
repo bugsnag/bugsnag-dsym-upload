@@ -20,7 +20,7 @@ install to the default directory, `/usr/lib/bin`.
 Install via the [Homebrew](https://brew.sh) formula:
 
 ```
-brew install --HEAD \
+brew install \
   https://raw.github.com/bugsnag/bugsnag-upload/master/tools/homebrew/bugsnag-dsym-upload.rb
 ```
 
