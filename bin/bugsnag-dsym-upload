@@ -77,6 +77,9 @@ if [[ ! -d $dsym_dir ]]; then
     exit_with_usage "'$dsym_dir' is not a directory"
 fi
 
+# Set IFS to ensure that file paths with spaces in get processed correctly
+IFS=$'\n'
+
 for dsym in $dsym_dir/*.dSYM; do
     log_verbose "Preparing to upload $dsym"
 
