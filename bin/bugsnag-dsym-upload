@@ -85,7 +85,7 @@ for dsym in $dsym_dir/*.dSYM; do
 
     if [[ -d $symbol_maps ]]; then
         log_verbose "Updating file with bitcode symbol maps in $symbol_maps"
-        dsymutil $dsym --symbol-map $symbol_maps
+        dsymutil "$dsym" --symbol-map "$symbol_maps"
     fi
 
     dwarf_data=$dsym/Contents/Resources/DWARF
@@ -97,7 +97,7 @@ for dsym in $dsym_dir/*.dSYM; do
         uuid=$(dwarfdump -u $file)
         if [[ $uuid == UUID* ]]; then
             log Uploading $uuid
-            curl https://upload.bugsnag.com -F dsym=@$file
+            curl https://upload.bugsnag.com -F dsym=@\"$file\"
             log
         else
             log_verbose "Skipping file without UUID: $file"
