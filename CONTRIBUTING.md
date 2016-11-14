@@ -11,6 +11,7 @@
 
 * Update the CHANGELOG with new content
 * Bump the version in the homebrew formula URL in `tools/homebrew`
+* Update the version in `VERSION`
 * Commit your changes
 * Tag the release
 * Push
