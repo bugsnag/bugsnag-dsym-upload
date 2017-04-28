@@ -3,9 +3,15 @@
 #   Given a directory, uploads any *.dSYM bundles with the directory to
 #   Bugsnag. As a pre-upload step, bitcode symbol maps can be combined with
 #   dSYM files to ensure symbols are sent for bitcode-enabled binaries.
+#
+#   Depends on:
+#   * curl
+#   * dwarfdump
+#   * dsymutil (for --symbol-maps, optional)
+#   * unzip (for uploading a .zip file, optional)
 
 function print_usage() {
-    echo "Usage: $0 [--symbol-maps DIR] dSYMS_DIR"
+    echo "Usage: $0 [--symbol-maps DIR] dSYMS_PATH"
     echo
     echo "-h, --help          Displays this message"
     echo "-v, --verbose       Print verbose logging output during execution"
@@ -15,7 +21,8 @@ function print_usage() {
     echo "--upload-server URL The server receiving dSYM files. Set this value if"
     echo "                    using an on-premise Bugsnag installation"
     echo
-    echo "dSYMS_DIR         A directory containing *.dSYM bundles to upload"
+    echo "dSYMS_PATH          A directory or .zip file containing *.dSYM bundles to"
+    echo "                    upload"
 }
 
 function exit_with_usage() {
@@ -81,7 +88,16 @@ if [[ -z $dsym_dir ]]; then
     exit_with_usage "No dSYM directory provided"
 fi
 if [[ ! -d $dsym_dir ]]; then
-    exit_with_usage "'$dsym_dir' is not a directory"
+    if [[ $dsym_dir == *".zip" ]]; then
+        if [[ ! -x "$(command -v unzip 2>/dev/null)" ]]; then
+            exit_with_usage "unzip command not found."
+        fi
+        temp_dir=$(mktemp -dt "bugsnag-dsym-upload")
+        unzip -qq $dsym_dir -d $temp_dir
+        dsym_dir=$temp_dir
+    else
+        exit_with_usage "'$dsym_dir' is not a directory or a zip file"
+    fi
 fi
 
 # Set IFS to ensure that file paths with spaces in get processed correctly

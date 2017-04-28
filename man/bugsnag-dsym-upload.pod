@@ -7,7 +7,7 @@
 =head1 SYNOPSIS
 
     bugsnag-dsym-upload [--verbose] [--upload-server URL]
-                                    [--symbol-maps MAP_DIR] dSYMS_DIR
+                                    [--symbol-maps MAP_DIR] dSYMS_PATH
     bugsnag-dsym-upload --help
 
 =head1 DESCRIPTION
@@ -16,6 +16,9 @@ Given a directory, bugsnag-dsym-upload uploads any *.dSYM bundles with the
 directory to the Bugsnag Upload API (https://upload.bugsnag.com). As a
 pre-upload step, bitcode symbol maps can be combined with dSYM files to ensure
 symbols are sent for bitcode-enabled binaries.
+
+Given a ZIP archive containing .dSYM bundles, the archive is first inflated in a
+temporary directory before uploading.
 
 =head1 DEPENDENCIES
 
@@ -35,6 +38,10 @@ of obsfucated symbols in bitcode-enabled dSYM files with the original symbols.
 
 Required. dwarfdump validates that the dSYM DWARF file corresponds to an
 application or framework.
+
+=item I<unzip>
+
+Optional, only required when uploading a ZIP archive.
 
 =back
 
