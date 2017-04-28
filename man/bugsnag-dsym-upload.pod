@@ -6,7 +6,8 @@
 
 =head1 SYNOPSIS
 
-    bugsnag-dsym-upload [--verbose] [--symbol-maps MAP_DIR] dSYMS_DIR
+    bugsnag-dsym-upload [--verbose] [--upload-server URL]
+                                    [--symbol-maps MAP_DIR] dSYMS_DIR
     bugsnag-dsym-upload --help
 
 =head1 DESCRIPTION
@@ -49,6 +50,11 @@ Display the help documentation for this command
 
 Path to a directory of bitcode symbol maps. When specified, the dSYM DWARF data
 will be updated with symbols prior to upload. Requires dsymutil.
+
+=item --upload-server URL
+
+The server receiving dSYM files. Set this value if using an on-premise Bugsnag
+installation. Defaults to I<https://upload.bugsnag.com>
 
 =item I<-s>, --silent
 

@@ -7,11 +7,13 @@
 function print_usage() {
     echo "Usage: $0 [--symbol-maps DIR] dSYMS_DIR"
     echo
-    echo "-h, --help        Displays this message"
-    echo "-v, --verbose     Print verbose logging output during execution"
-    echo "--symbol-maps DIR Path to a directory of bitcode symbol maps. The"
-    echo "                  dSYM files will be restored with symbols prior to"
-    echo "                  upload. Requires dsymutil."
+    echo "-h, --help          Displays this message"
+    echo "-v, --verbose       Print verbose logging output during execution"
+    echo "--symbol-maps DIR   Path to a directory of bitcode symbol maps. The"
+    echo "                    dSYM files will be restored with symbols prior to"
+    echo "                    upload. Requires dsymutil."
+    echo "--upload-server URL The server receiving dSYM files. Set this value if"
+    echo "                    using an on-premise Bugsnag installation"
     echo
     echo "dSYMS_DIR         A directory containing *.dSYM bundles to upload"
 }
@@ -35,6 +37,7 @@ function log_verbose() {
     fi
 }
 
+upload_server=https://upload.bugsnag.com
 unset symbol_maps
 unset dsym_dir
 unset verbose
@@ -53,6 +56,10 @@ while [[ $# -gt 0 ]]; do
             shift;;
         --symbol-maps)
             symbol_maps=$2
+            shift
+            shift;;
+        --upload-server)
+            upload_server=$2
             shift
             shift;;
         -*)
@@ -80,6 +87,8 @@ fi
 # Set IFS to ensure that file paths with spaces in get processed correctly
 IFS=$'\n'
 
+log_verbose "Uploading files to $upload_server"
+
 for dsym in $dsym_dir/*.dSYM; do
     log_verbose "Preparing to upload $dsym"
 
@@ -97,7 +106,7 @@ for dsym in $dsym_dir/*.dSYM; do
         uuid=$(dwarfdump -u $file)
         if [[ $uuid == UUID* ]]; then
             log Uploading $uuid
-            curl https://upload.bugsnag.com -F dsym=@\"$file\"
+            curl $upload_server -F dsym=@\"$file\"
             log
         else
             log_verbose "Skipping file without UUID: $file"
