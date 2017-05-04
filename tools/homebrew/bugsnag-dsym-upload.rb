@@ -6,7 +6,7 @@ class BugsnagDsymUpload < Formula
 
   homepage 'https://docs.bugsnag.com/api/dsym-upload'
   head 'https://github.com/bugsnag/bugsnag-upload'
-  url 'https://github.com/bugsnag/bugsnag-upload/archive/v1.0.2.tar.gz'
+  url 'https://github.com/bugsnag/bugsnag-upload/archive/v1.1.0.tar.gz'
 
   def install
     system "make", "BINDIR=#{bin}", "MANDIR=#{man}", "install"

@@ -1,3 +1,11 @@
+## 1.1.0 (2017-05-08)
+
+### Enhancements
+
+* Add Fastlane plugin and action to upload dSYM files
+* Support uploading a .zip archive containing dSYM files
+* Improve error messages, add summary at the end
+
 ## 1.0.2 (2016-11-14)
 
 ### Enhancements

@@ -9,10 +9,15 @@
 
 ## Releasing a new version
 
-* Update the CHANGELOG with new content
-* Bump the version in the homebrew formula URL in `tools/homebrew`
-* Update the version in `VERSION`
-* Commit your changes
-* Tag the release
-* Push
-* Update the documentation as needed on docs.bugsnag.com
+1. Update the CHANGELOG with new content
+2. Update the version number
+   * Bump the version in the homebrew formula URL in `tools/homebrew`
+   * Update the version in `VERSION`
+   * Update the version in
+     `tools/fastlane-plugin/lib/fastlane/plugin/bugsnag/version.rb`
+3. Commit your changes
+4. Tag the release
+5. Push
+   * Create a new GitHub release with the changes
+   * Update the fastlane-plugin-bugsnag gem
+6. Update the documentation as needed on docs.bugsnag.com
