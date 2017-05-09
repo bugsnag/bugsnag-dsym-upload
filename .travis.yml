@@ -8,4 +8,4 @@ before_install:
 - gem --version
 
 script:
-- cd tools/fastlane-plugin && bundle && rake spec
+- make ci
