@@ -104,6 +104,8 @@ fi
 IFS=$'\n'
 
 log_verbose "Uploading files to $upload_server"
+success_count=0
+fail_count=0
 
 for dsym in $dsym_dir/*.dSYM; do
     log_verbose "Preparing to upload $dsym"
@@ -116,16 +118,32 @@ for dsym in $dsym_dir/*.dSYM; do
     dwarf_data=$dsym/Contents/Resources/DWARF
     if [[ ! -d $dwarf_data ]]; then
         log_verbose "Skipping file missing DWARF data: $dsym"
+        fail_count=$((fail_count+1))
         continue
     fi
     for file in $dwarf_data/*; do
         uuid=$(dwarfdump -u $file 2>/dev/null)
         if [[ $uuid == UUID* ]]; then
             log Uploading $uuid
-            curl --silent --show-error $upload_server -F dsym=@\"$file\" | grep -v '^OK$'
+            output=$(curl --silent --show-error $upload_server -F dsym=@\"$file\")
+            if [ $? -eq 0 ]; then
+                success_count=$((success_count+1))
+            else
+                fail_count=$((fail_count+1))
+            fi
+            echo $output | grep -v '^OK$'
             log
         else
             log_verbose "Skipping file without UUID: $file"
+            fail_count=$((fail_count+1))
         fi
     done
 done
+
+if [ $success_count -gt 0 ]; then
+    log "$success_count files uploaded successfully"
+fi
+
+if [ $fail_count -gt 0 ]; then
+    log "$fail_count files failed to upload"
+fi
