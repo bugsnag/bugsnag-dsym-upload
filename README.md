@@ -48,7 +48,25 @@ lane :refresh_dsyms do
 end
 ```
 
-View usage information and options by running `fastlane action
-upload_symbols_to_bugsnag`
+Common options:
+
+* `dsym_path`: A path or array of paths for directories containing \*.dSYM files
+  or a single \*.zip file to upload. If unspecified, the default behavior is to
+  upload the zip files retrieved by a prior invocation of
+  [`download_dsyms`](https://docs.fastlane.tools/actions/#download_dsyms), or
+  any .dSYM files within the current directory.
+* `upload_url`: The URL of the server receiving symbol files. Update this value
+  if you are using a private instance of Bugsnag
+
+View usage additional usage information and options by running `fastlane action
+upload_symbols_to_bugsnag`.
+
+Check out the [example `Fastfile`](tools/fastlane-plugin/fastlane/Fastfile) to
+see how to use this plugin.  Try it by cloning the repo, running `fastlane
+install_plugins` and `bundle exec fastlane test`.
+
+If you have trouble using plugins, check out the [Plugins
+Troubleshooting](https://docs.fastlane.tools/plugins/plugins-troubleshooting/)
+guide.
 
 ## [License](LICENSE.txt)
