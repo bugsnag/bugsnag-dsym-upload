@@ -119,7 +119,7 @@ for dsym in $dsym_dir/*.dSYM; do
         continue
     fi
     for file in $dwarf_data/*; do
-        uuid=$(dwarfdump -u $file)
+        uuid=$(dwarfdump -u $file 2>/dev/null)
         if [[ $uuid == UUID* ]]; then
             log Uploading $uuid
             curl --silent --show-error $upload_server -F dsym=@\"$file\" | grep -v '^OK$'
