@@ -130,6 +130,7 @@ for dsym in $dsym_dir/*.dSYM; do
                 success_count=$((success_count+1))
             else
                 fail_count=$((fail_count+1))
+                log_verbose "Failed to upload file: $file"
             fi
             echo $output | grep -v '^OK$'
             log
