@@ -3,17 +3,26 @@
 #   Given a directory, uploads any *.dSYM bundles with the directory to
 #   Bugsnag. As a pre-upload step, bitcode symbol maps can be combined with
 #   dSYM files to ensure symbols are sent for bitcode-enabled binaries.
+#
+#   Depends on:
+#   * curl
+#   * dwarfdump
+#   * dsymutil (for --symbol-maps, optional)
+#   * unzip (for uploading a .zip file, optional)
 
 function print_usage() {
-    echo "Usage: $0 [--symbol-maps DIR] dSYMS_DIR"
+    echo "Usage: $0 [--symbol-maps DIR] dSYMS_PATH"
     echo
-    echo "-h, --help        Displays this message"
-    echo "-v, --verbose     Print verbose logging output during execution"
-    echo "--symbol-maps DIR Path to a directory of bitcode symbol maps. The"
-    echo "                  dSYM files will be restored with symbols prior to"
-    echo "                  upload. Requires dsymutil."
+    echo "-h, --help          Displays this message"
+    echo "-v, --verbose       Print verbose logging output during execution"
+    echo "--symbol-maps DIR   Path to a directory of bitcode symbol maps. The"
+    echo "                    dSYM files will be restored with symbols prior to"
+    echo "                    upload. Requires dsymutil."
+    echo "--upload-server URL The server receiving dSYM files. Set this value if"
+    echo "                    using an on-premise Bugsnag installation"
     echo
-    echo "dSYMS_DIR         A directory containing *.dSYM bundles to upload"
+    echo "dSYMS_PATH          A directory or .zip file containing *.dSYM bundles to"
+    echo "                    upload"
 }
 
 function exit_with_usage() {
@@ -35,6 +44,7 @@ function log_verbose() {
     fi
 }
 
+upload_server=https://upload.bugsnag.com
 unset symbol_maps
 unset dsym_dir
 unset verbose
@@ -53,6 +63,10 @@ while [[ $# -gt 0 ]]; do
             shift;;
         --symbol-maps)
             symbol_maps=$2
+            shift
+            shift;;
+        --upload-server)
+            upload_server=$2
             shift
             shift;;
         -*)
@@ -74,11 +88,24 @@ if [[ -z $dsym_dir ]]; then
     exit_with_usage "No dSYM directory provided"
 fi
 if [[ ! -d $dsym_dir ]]; then
-    exit_with_usage "'$dsym_dir' is not a directory"
+    if [[ $dsym_dir == *".zip" ]]; then
+        if [[ ! -x "$(command -v unzip 2>/dev/null)" ]]; then
+            exit_with_usage "unzip command not found."
+        fi
+        temp_dir=$(mktemp -dt "bugsnag-dsym-upload")
+        unzip -qq $dsym_dir -d $temp_dir
+        dsym_dir=$temp_dir
+    else
+        exit_with_usage "'$dsym_dir' is not a directory or a zip file"
+    fi
 fi
 
 # Set IFS to ensure that file paths with spaces in get processed correctly
 IFS=$'\n'
+
+log_verbose "Uploading files to $upload_server"
+success_count=0
+fail_count=0
 
 for dsym in $dsym_dir/*.dSYM; do
     log_verbose "Preparing to upload $dsym"
@@ -90,17 +117,34 @@ for dsym in $dsym_dir/*.dSYM; do
 
     dwarf_data=$dsym/Contents/Resources/DWARF
     if [[ ! -d $dwarf_data ]]; then
-        log_verbose "Skipping dSYM missing DWARF data: $dsym"
+        log_verbose "Skipping file missing DWARF data: $dsym"
+        fail_count=$((fail_count+1))
         continue
     fi
     for file in $dwarf_data/*; do
-        uuid=$(dwarfdump -u $file)
+        uuid=$(dwarfdump -u $file 2>/dev/null)
         if [[ $uuid == UUID* ]]; then
             log Uploading $uuid
-            curl https://upload.bugsnag.com -F dsym=@\"$file\"
+            output=$(curl --silent --show-error $upload_server -F dsym=@\"$file\")
+            if [ $? -eq 0 ]; then
+                success_count=$((success_count+1))
+            else
+                fail_count=$((fail_count+1))
+                log_verbose "Failed to upload file: $file"
+            fi
+            echo $output | grep -v '^OK$'
             log
         else
             log_verbose "Skipping file without UUID: $file"
+            fail_count=$((fail_count+1))
         fi
     done
 done
+
+if [ $success_count -gt 0 ]; then
+    log "$success_count files uploaded successfully"
+fi
+
+if [ $fail_count -gt 0 ]; then
+    log "$fail_count files failed to upload"
+fi

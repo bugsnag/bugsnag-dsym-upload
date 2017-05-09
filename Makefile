@@ -18,3 +18,9 @@ install: $(BINDIR)/$(PROJECT) $(MANDIR)/man1/$(PROJECT).1
 
 uninstall:
 	@rm $(BINDIR)/$(PROJECT) $(MANDIR)/man1/$(PROJECT).1
+
+test:
+	@cd tools/fastlane-plugin && rake spec
+
+ci:
+	@cd tools/fastlane-plugin && bundle && rake spec
