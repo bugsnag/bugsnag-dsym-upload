@@ -122,7 +122,7 @@ for dsym in $dsym_dir/*.dSYM; do
         uuid=$(dwarfdump -u $file)
         if [[ $uuid == UUID* ]]; then
             log Uploading $uuid
-            curl --silent --show-error $upload_server -F dsym=@\"$file\"
+            curl --silent --show-error $upload_server -F dsym=@\"$file\" | grep -v '^OK$'
             log
         else
             log_verbose "Skipping file without UUID: $file"
