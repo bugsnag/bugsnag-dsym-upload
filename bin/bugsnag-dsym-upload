@@ -115,7 +115,7 @@ for dsym in $dsym_dir/*.dSYM; do
 
     dwarf_data=$dsym/Contents/Resources/DWARF
     if [[ ! -d $dwarf_data ]]; then
-        log_verbose "Skipping dSYM missing DWARF data: $dsym"
+        log_verbose "Skipping file missing DWARF data: $dsym"
         continue
     fi
     for file in $dwarf_data/*; do
