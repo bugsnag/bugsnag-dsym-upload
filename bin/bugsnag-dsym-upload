@@ -77,6 +77,9 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# Set IFS to ensure that file paths with spaces in get processed correctly
+IFS=$'\n'
+
 if [[ ! -z $symbol_maps ]]; then
     if [[ ! -d $symbol_maps ]]; then
         exit_with_usage "Bitcode symbol map parameter is not a directory"
@@ -99,9 +102,6 @@ if [[ ! -d $dsym_dir ]]; then
         exit_with_usage "'$dsym_dir' is not a directory or a zip file"
     fi
 fi
-
-# Set IFS to ensure that file paths with spaces in get processed correctly
-IFS=$'\n'
 
 log_verbose "Uploading files to $upload_server"
 success_count=0
