@@ -1,4 +1,4 @@
-# bugsnag-upload
+# bugsnag-dsym-upload
 
 Commands for uploading files to Bugsnag via the Bugsnag Upload APIs
 
