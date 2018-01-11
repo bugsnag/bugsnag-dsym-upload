@@ -3,7 +3,7 @@ require "json"
 
 module Fastlane
   module Actions
-    class BugsnagNotifyBuildAction < Action
+    class SendBuildToBugsnagAction < Action
 
       BUILD_TOOL = "bugsnag-fastlane-plugin"
 
@@ -83,7 +83,7 @@ module Fastlane
       end
 
       def self.example_code
-        ['bugsnag_notify_build']
+        ['send_build_to_bugsnag']
       end
 
       def self.category
