@@ -260,6 +260,14 @@ module Fastlane
         output
       end
 
+      def self.parse_response_body(response)
+        begin
+          JSON.load(response.body)
+        rescue => e
+          UI.user_error! "Failed to notify Bugsnag of a new build: #{e}"
+        end
+      end
+
       def self.send_notification(url, body)
         require "net/http"
         uri = URI.parse(url)
@@ -272,8 +280,20 @@ module Fastlane
         uri.path == "" ? "/" : uri.path
         request = Net::HTTP::Post.new(uri, {"Content-Type" => "application/json"})
         request.body = body
-        http.request(request)
-        UI.say "Build notification sent to Bugsnag"
+        begin
+          response = http.request(request)
+        rescue => e
+          UI.user_error! "Failed to notify Bugsnag of a new build: #{e}"
+        end
+        if response.code != "200"
+          body = parse_response_body(response)
+          if body and body.has_key? "errors"
+            errors = body["errors"].map {|error| "\n  * #{error}"}.join
+            UI.user_error! "The following errors occurred while notifying Bugsnag:#{errors}.\n\nPlease update your lane config and retry."
+          else
+            UI.user_error! "Failed to notify Bugsnag of a new build. Please retry. HTTP status code: #{response.code}"
+          end
+        end
       end
     end
   end
