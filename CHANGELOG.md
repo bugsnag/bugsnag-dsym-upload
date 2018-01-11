@@ -1,3 +1,10 @@
+## 1.2.0 (2018-01-11)
+
+### Enhancements
+
+* Add action to the Fastlane plugin to upload builds to Bugsnag. Use
+  `send_build_to_bugsnag` to get started.
+
 ## 1.1.0 (2017-05-08)
 
 ### Enhancements
