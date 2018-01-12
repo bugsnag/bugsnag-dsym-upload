@@ -26,6 +26,7 @@ module Fastlane
 
         payload[:sourceControl][:revision] = params[:revision] if params[:revision]
         payload[:sourceControl][:repository] = params[:repository] if params[:repository]
+        payload[:sourceControl][:provider] = params[:provider] if params[:provider]
 
         payload.reject! {|k,v| v == nil || (v.is_a?(Hash) && v.empty?)}
 
@@ -141,6 +142,16 @@ module Fastlane
                                        description: "The source control revision id",
                                        optional: true,
                                        default_value: options[:revision]),
+          FastlaneCore::ConfigItem.new(key: :provider,
+                                       description: "The source control provider, one of 'github-enterprise', 'gitlab-onpremise', or 'bitbucket-server', if any",
+                                       optional: true,
+                                       default_value: nil,
+                                       verify_block: proc do |value|
+                                         valid = ['github-enterprise', 'gitlab-onpremise', 'bitbucket-server'].include? value
+                                         unless valid
+                                           UI.user_error!("Provider must be one of 'github-enterprise', 'gitlab-onpremise', 'bitbucket-server', or unspecified")
+                                         end
+                                       end),
           FastlaneCore::ConfigItem.new(key: :endpoint,
                                        description: "Bugsnag deployment endpoint",
                                        optional: true,
@@ -263,8 +274,8 @@ module Fastlane
       def self.parse_response_body(response)
         begin
           JSON.load(response.body)
-        rescue => e
-          UI.user_error! "Failed to notify Bugsnag of a new build: #{e}"
+        rescue
+          nil
         end
       end
 
@@ -285,13 +296,16 @@ module Fastlane
         rescue => e
           UI.user_error! "Failed to notify Bugsnag of a new build: #{e}"
         end
-        if response.code != "200"
-          body = parse_response_body(response)
-          if body and body.has_key? "errors"
+        if body = parse_response_body(response)
+          if body.has_key? "errors"
             errors = body["errors"].map {|error| "\n  * #{error}"}.join
             UI.user_error! "The following errors occurred while notifying Bugsnag:#{errors}.\n\nPlease update your lane config and retry."
-          else
+          elsif response.code != "200"
             UI.user_error! "Failed to notify Bugsnag of a new build. Please retry. HTTP status code: #{response.code}"
+          end
+          if body.has_key? "warnings"
+            warnings = body["warnings"].map {|warn| "\n  * #{warn}"}.join
+            UI.important "Sending the build to Bugsnag succeeded with the following warnings:#{warnings}\n\nPlease update your lane config."
           end
         end
       end
