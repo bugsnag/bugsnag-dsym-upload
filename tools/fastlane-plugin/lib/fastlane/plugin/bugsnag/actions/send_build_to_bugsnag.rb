@@ -26,6 +26,7 @@ module Fastlane
 
         payload[:sourceControl][:revision] = params[:revision] if params[:revision]
         payload[:sourceControl][:repository] = params[:repository] if params[:repository]
+        payload[:sourceControl][:provider] = params[:provider] if params[:provider]
 
         payload.reject! {|k,v| v == nil || (v.is_a?(Hash) && v.empty?)}
 
@@ -141,6 +142,16 @@ module Fastlane
                                        description: "The source control revision id",
                                        optional: true,
                                        default_value: options[:revision]),
+          FastlaneCore::ConfigItem.new(key: :provider,
+                                       description: "The source control provider, one of 'github-enterprise', 'gitlab-onpremise', or 'bitbucket-server', if any",
+                                       optional: true,
+                                       default_value: nil,
+                                       verify_block: proc do |value|
+                                         valid = ['github-enterprise', 'gitlab-onpremise', 'bitbucket-server'].include? value
+                                         unless valid
+                                           UI.user_error!("Provider must be one of 'github-enterprise', 'gitlab-onpremise', 'bitbucket-server', or unspecified")
+                                         end
+                                       end),
           FastlaneCore::ConfigItem.new(key: :endpoint,
                                        description: "Bugsnag deployment endpoint",
                                        optional: true,
