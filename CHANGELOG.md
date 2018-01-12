@@ -1,3 +1,8 @@
+## 1.2.1 (2018-01-12)
+
+* Validate and send source control provider for hosted versions of GitHub,
+  GitLab, and Bitbucket
+
 ## 1.2.0 (2018-01-11)
 
 ### Enhancements
