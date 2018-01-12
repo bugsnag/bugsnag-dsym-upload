@@ -274,8 +274,8 @@ module Fastlane
       def self.parse_response_body(response)
         begin
           JSON.load(response.body)
-        rescue => e
-          UI.user_error! "Failed to notify Bugsnag of a new build: #{e}"
+        rescue
+          nil
         end
       end
 
@@ -296,13 +296,16 @@ module Fastlane
         rescue => e
           UI.user_error! "Failed to notify Bugsnag of a new build: #{e}"
         end
-        if response.code != "200"
-          body = parse_response_body(response)
-          if body and body.has_key? "errors"
+        if body = parse_response_body(response)
+          if body.has_key? "errors"
             errors = body["errors"].map {|error| "\n  * #{error}"}.join
             UI.user_error! "The following errors occurred while notifying Bugsnag:#{errors}.\n\nPlease update your lane config and retry."
-          else
+          elsif response.code != "200"
             UI.user_error! "Failed to notify Bugsnag of a new build. Please retry. HTTP status code: #{response.code}"
+          end
+          if body.has_key? "warnings"
+            warnings = body["warnings"].map {|warn| "\n  * #{warn}"}.join
+            UI.important "Sending the build to Bugsnag succeeded with the following warnings:#{warnings}\n\nPlease update your lane config."
           end
         end
       end
