@@ -75,6 +75,15 @@ describe Action do
       Action.run({dsym_path: [dsym1, dsym2]})
     end
 
+    it 'accepts a project root argument' do
+      root_path = "/test/test/test"
+      expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
+                                              "--silent",
+                                              "--project-root", root_path,
+                                              FIXTURE_PATH)
+      Action.run({dsym_path: FIXTURE_PATH, project_root: root_path})
+    end
+
     context 'using a private server' do
       it 'uploads to the private server' do
         expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,

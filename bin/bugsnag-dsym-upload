@@ -20,7 +20,8 @@ function print_usage() {
     echo "                    upload. Requires dsymutil."
     echo "--upload-server URL The server receiving dSYM files. Set this value if"
     echo "                    using an on-premise Bugsnag installation"
-    echo
+    echo "--project-root DIR  The root directory of the project. This will help to"
+    echo "                    group error reports by project"
     echo "dSYMS_PATH          A directory or .zip file containing *.dSYM bundles to"
     echo "                    upload"
 }
@@ -49,6 +50,7 @@ unset symbol_maps
 unset dsym_dir
 unset verbose
 unset silent
+unset project_root
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -69,6 +71,10 @@ while [[ $# -gt 0 ]]; do
             upload_server=$2
             shift
             shift;;
+        --project-root)
+            project_root=$2
+            shift
+            shift;;
         -*)
             exit_with_usage "Invalid parameter provided: $1";;
         *)
@@ -85,6 +91,11 @@ if [[ ! -z $symbol_maps ]]; then
         exit_with_usage "Bitcode symbol map parameter is not a directory"
     elif [[ ! -x "$(command -v dsymutil 2>/dev/null)" ]]; then
         exit_with_usage "dsymutil command not found."
+    fi
+fi
+if [[ ! -z $project_root ]]; then
+    if [[ ! -d $project_root ]]; then
+        exit_with_usage "Project root is not a directory"
     fi
 fi
 if [[ -z $dsym_dir ]]; then
@@ -125,7 +136,11 @@ for dsym in $dsym_dir/*.dSYM; do
         uuid=$(dwarfdump -u $file 2>/dev/null)
         if [[ $uuid == UUID* ]]; then
             log Uploading $uuid
-            output=$(curl --silent --show-error $upload_server -F dsym=@\"$file\")
+            if [[ -d $project_root ]]; then
+                output=$(curl --silent --show-error $upload_server -F dsym=@\"$file\" -F projectRoot=$project_root)
+            else
+                output=$(curl --silent --show-error $upload_server -F dsym=@\"$file\")
+            fi
             if [ $? -eq 0 ]; then
                 success_count=$((success_count+1))
             else
