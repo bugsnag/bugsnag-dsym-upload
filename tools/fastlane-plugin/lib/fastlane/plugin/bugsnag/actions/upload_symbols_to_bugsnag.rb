@@ -77,7 +77,7 @@ module Fastlane
           FastlaneCore::ConfigItem.new(key: :project_root,
                                        env_name: "BUGSNAG_PROJECT_ROOT",
                                        description: "Root path of the project",
-                                       default_value: nil,
+                                       default_value: Dir::pwd,
                                        optional: true)
         ]
       end

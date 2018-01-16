@@ -93,11 +93,6 @@ if [[ ! -z $symbol_maps ]]; then
         exit_with_usage "dsymutil command not found."
     fi
 fi
-if [[ ! -z $project_root ]]; then
-    if [[ ! -d $project_root ]]; then
-        exit_with_usage "Project root is not a directory"
-    fi
-fi
 if [[ -z $dsym_dir ]]; then
     exit_with_usage "No dSYM directory provided"
 fi
