@@ -20,7 +20,8 @@ function print_usage() {
     echo "                    upload. Requires dsymutil."
     echo "--upload-server URL The server receiving dSYM files. Set this value if"
     echo "                    using an on-premise Bugsnag installation"
-    echo
+    echo "--project-root DIR  The root directory of the project. This will help to"
+    echo "                    group error reports by project"
     echo "dSYMS_PATH          A directory or .zip file containing *.dSYM bundles to"
     echo "                    upload"
 }
@@ -49,6 +50,7 @@ unset symbol_maps
 unset dsym_dir
 unset verbose
 unset silent
+unset project_root
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -67,6 +69,10 @@ while [[ $# -gt 0 ]]; do
             shift;;
         --upload-server)
             upload_server=$2
+            shift
+            shift;;
+        --project-root)
+            project_root=$2
             shift
             shift;;
         -*)
@@ -125,7 +131,11 @@ for dsym in $dsym_dir/*.dSYM; do
         uuid=$(dwarfdump -u $file 2>/dev/null)
         if [[ $uuid == UUID* ]]; then
             log Uploading $uuid
-            output=$(curl --silent --show-error $upload_server -F dsym=@\"$file\")
+            if [[ -d $project_root ]]; then
+                output=$(curl --silent --show-error $upload_server -F dsym=@\"$file\" -F projectRoot=$project_root)
+            else
+                output=$(curl --silent --show-error $upload_server -F dsym=@\"$file\")
+            fi
             if [ $? -eq 0 ]; then
                 success_count=$((success_count+1))
             else
