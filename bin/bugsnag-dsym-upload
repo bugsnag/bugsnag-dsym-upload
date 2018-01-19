@@ -131,7 +131,7 @@ for dsym in $dsym_dir/*.dSYM; do
         uuid=$(dwarfdump -u $file 2>/dev/null)
         if [[ $uuid == UUID* ]]; then
             log Uploading $uuid
-            if [[ -d $project_root ]]; then
+            if [[ ! -z $project_root ]]; then
                 output=$(curl --silent --show-error $upload_server -F dsym=@\"$file\" -F projectRoot=$project_root)
             else
                 output=$(curl --silent --show-error $upload_server -F dsym=@\"$file\")
