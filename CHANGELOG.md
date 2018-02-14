@@ -1,3 +1,16 @@
+## 1.3.0 (2018-02-14)
+
+### Enhancements
+
+* Automatically detect configuration file locations in React Native projects
+
+### Bug fixes
+
+* Print correct message when app version is not found. Previously a message
+  about API key was printed.
+* Prefer configuration based on the lane platform if available. Previously
+  Android was assumed to be the default if the configuration files were present.
+
 ## 1.2.1 (2018-01-12)
 
 * Validate and send source control provider for hosted versions of GitHub,
