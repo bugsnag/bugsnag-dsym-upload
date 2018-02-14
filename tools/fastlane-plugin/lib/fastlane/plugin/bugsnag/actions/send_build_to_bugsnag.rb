@@ -163,17 +163,34 @@ module Fastlane
 
       def self.load_default_values
         options = {releaseStage: "production", user: `whoami`.chomp}
-        if file_path = default_android_manifest_path
-          options.merge!(options_from_android_manifest(file_path))
-          build_gradle_path = Dir.glob("{android/,}app/build.gradle").first
-          build_gradle_path ||= Dir.glob("build.gradle")
-          options.merge!(options_from_build_gradle(build_gradle_path)) if build_gradle_path
-        elsif file_path = default_info_plist_path
-          options.merge!(options_from_info_plist(file_path))
+        case lane_context[:PLATFORM_NAME]
+        when nil
+          if file_path = default_android_manifest_path
+            options.merge!(load_default_android_values(file_path))
+          elsif file_path = default_info_plist_path
+            options.merge!(options_from_info_plist(file_path))
+          end
+        when :android
+          if file_path = default_android_manifest_path
+            options.merge!(load_default_android_values(file_path))
+          end
+        else
+          if file_path = default_info_plist_path
+            options.merge!(options_from_info_plist(file_path))
+          end
         end
+
         if git_opts = git_remote_options
           options.merge!(git_opts)
         end
+        options
+      end
+
+      def self.load_default_android_values file_path
+        options = options_from_android_manifest(file_path)
+        build_gradle_path = Dir.glob("{android/,}app/build.gradle").first
+        build_gradle_path ||= Dir.glob("build.gradle").first
+        options.merge!(options_from_build_gradle(build_gradle_path)) if build_gradle_path
         options
       end
 
