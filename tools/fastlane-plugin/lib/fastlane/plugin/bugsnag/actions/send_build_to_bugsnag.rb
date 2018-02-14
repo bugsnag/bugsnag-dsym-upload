@@ -34,7 +34,7 @@ module Fastlane
           UI.user_error! missing_api_key_message(params)
         end
         if payload[:appVersion].nil?
-          UI.user_error! missing_api_key_message(params)
+          UI.user_error! missing_app_version_message(params)
         end
         send_notification(params[:endpoint], ::JSON.dump(payload))
       end
