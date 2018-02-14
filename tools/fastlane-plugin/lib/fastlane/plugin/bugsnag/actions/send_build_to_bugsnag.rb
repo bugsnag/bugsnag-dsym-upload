@@ -165,7 +165,7 @@ module Fastlane
         options = {releaseStage: "production", user: `whoami`.chomp}
         if file_path = default_android_manifest_path
           options.merge!(options_from_android_manifest(file_path))
-          build_gradle_path = Dir.glob("app/build.gradle").first
+          build_gradle_path = Dir.glob("{android/,}app/build.gradle").first
           build_gradle_path ||= Dir.glob("build.gradle")
           options.merge!(options_from_build_gradle(build_gradle_path)) if build_gradle_path
         elsif file_path = default_info_plist_path
@@ -178,11 +178,11 @@ module Fastlane
       end
 
       def self.default_android_manifest_path
-        Dir.glob("./{app,}/src/main/AndroidManifest.xml").first
+        Dir.glob("./{android/,}{app,}/src/main/AndroidManifest.xml").first
       end
 
       def self.default_info_plist_path
-        Dir.glob("./*/Info.plist").first
+        Dir.glob("./{ios/,}*/Info.plist").reject {|path| path.include?('build/') }.first
       end
 
       def self.options_from_info_plist file_path
