@@ -14,14 +14,25 @@ module Fastlane
         else
           payload.merge!(options_from_info_plist(params[:config_file])) if params[:config_file]
         end
+
+        default_plist = default_info_plist_path
+        default_manifest = default_android_manifest_path
+        if (lane_context[:PLATFORM_NAME] == :android and params[:config_file] == default_manifest) or
+           (lane_context[:PLATFORM_NAME] != :android and params[:config_file] == default_plist)
+          # Load custom API key and version properties only if config file has not been overridden
+          payload[:apiKey] = params[:api_key] unless params[:api_key].nil?
+          payload[:appVersion] = params[:app_version] unless params[:app_version].nil?
+          payload[:appVersionCode] = params[:android_version_code] unless params[:android_version_code].nil?
+          payload[:appBundleVersion] = params[:ios_bundle_version] unless params[:ios_bundle_version].nil?
+        else
+          # Print which file is populating version and API key information since the value has been
+          # overridden
+          UI.message("Loading API key and app version info from #{params[:config_file]}")
+        end
         payload.delete(:config_file)
 
         # Overwrite automated options with configured if set
-        payload[:apiKey] = params[:api_key] unless params[:api_key].nil?
-        payload[:appVersion] = params[:app_version] unless params[:app_version].nil?
         payload[:releaseStage] = params[:release_stage] unless params[:release_stage].nil?
-        payload[:appVersionCode] = params[:android_version_code] unless params[:android_version_code].nil?
-        payload[:appBundleVersion] = params[:ios_bundle_version] unless params[:ios_bundle_version].nil?
         payload[:builderName] = params[:builder]
 
         payload[:sourceControl][:revision] = params[:revision] if params[:revision]
@@ -199,7 +210,7 @@ module Fastlane
       end
 
       def self.default_info_plist_path
-        Dir.glob("./{ios/,}*/Info.plist").reject {|path| path.include?('build/') }.first
+        Dir.glob("./{ios/,}*/Info.plist").reject {|path| path =~ /build|test/i }.first
       end
 
       def self.options_from_info_plist file_path

@@ -2,8 +2,6 @@ require 'spec_helper'
 
 Action = Fastlane::Actions::UploadSymbolsToBugsnagAction
 
-FIXTURE_PATH = File.expand_path(File.join(File.dirname(__FILE__), 'fixtures'))
-
 describe Action do
 
   it 'has an executable upload script' do
