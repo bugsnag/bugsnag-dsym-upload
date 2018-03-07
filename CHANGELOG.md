@@ -1,3 +1,16 @@
+## 1.3.1 (2018-03-07)
+
+### Bug fixes
+
+* (fastlane) Exclude `Info.plist` files in test directories from detected a the
+  default location for build info
+  [#11](https://github.com/bugsnag/bugsnag-dsym-upload/issues/11)
+  [#12](https://github.com/bugsnag/bugsnag-dsym-upload/pull/12)
+* (fastlane) Prefer build info values populated from a specified `config_file`
+  if the default config file is overridden
+  [#11](https://github.com/bugsnag/bugsnag-dsym-upload/issues/11)
+  [#12](https://github.com/bugsnag/bugsnag-dsym-upload/pull/12)
+
 ## 1.3.0 (2018-02-14)
 
 ### Enhancements
