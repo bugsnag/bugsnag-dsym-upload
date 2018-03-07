@@ -6,3 +6,5 @@ end
 
 require 'fastlane' # to import the Action super class
 require 'fastlane/plugin/bugsnag' # import the actual plugin
+
+FIXTURE_PATH = File.expand_path(File.join(File.dirname(__FILE__), 'fixtures'))

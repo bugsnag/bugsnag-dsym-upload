@@ -4,8 +4,6 @@ require 'fastlane/actions/get_info_plist_value'
 
 BuildAction = Fastlane::Actions::SendBuildToBugsnagAction
 
-FIXTURE_PATH = File.expand_path(File.join(File.dirname(__FILE__), 'fixtures'))
-
 describe BuildAction do
   def load_default_opts
     BuildAction.available_options.map do |x|
