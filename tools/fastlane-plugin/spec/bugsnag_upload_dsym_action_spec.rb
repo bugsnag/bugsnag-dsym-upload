@@ -11,7 +11,20 @@ describe Action do
   describe '#run' do
     it 'silences script output by default' do
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
-                                              "--silent", FIXTURE_PATH)
+                                              "--silent", FIXTURE_PATH).and_return(true)
+      Action.run({dsym_path: FIXTURE_PATH})
+    end
+
+    it 'prints verbose if verbose flag set' do
+      expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
+                                              "--verbose", FIXTURE_PATH).and_return(true)
+      Action.run({dsym_path: FIXTURE_PATH, verbose: true})
+    end
+
+    it 'UI.user_error when script fails' do
+      expect(Fastlane::UI).to receive(:user_error!).with("Failed uploading #{FIXTURE_PATH}")
+      expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
+        "--silent", FIXTURE_PATH).and_return(false)
       Action.run({dsym_path: FIXTURE_PATH})
     end
 
@@ -30,14 +43,14 @@ describe Action do
     it 'uploads a single .dSYM file' do
       directory = File.join(FIXTURE_PATH, 'dSYMs')
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
-                                              "--silent", directory)
+                                              "--silent", directory).and_return(true)
       Action.run({dsym_path: File.join(FIXTURE_PATH, 'dSYMs/app.dSYM')})
     end
 
     it 'uploads a .zip of .dSYM files' do
       path = File.join(FIXTURE_PATH, 'files.zip')
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
-                                              "--silent", path)
+                                              "--silent", path).and_return(true)
       Action.run({dsym_path: path})
     end
 
@@ -45,9 +58,9 @@ describe Action do
       zip1 = File.join(FIXTURE_PATH, 'files.zip')
       zip2 = File.join(FIXTURE_PATH, 'more_files.zip')
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
-                                              "--silent", zip1)
+                                              "--silent", zip1).and_return(true)
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
-                                              "--silent", zip2)
+                                              "--silent", zip2).and_return(true)
       Action.run({dsym_path: [zip1, zip2]})
     end
 
@@ -58,9 +71,9 @@ describe Action do
       dsym4 = File.join(FIXTURE_PATH, 'stuff/app2.dSYM')
       directories = [File.join(FIXTURE_PATH, 'dSYMs'), File.join(FIXTURE_PATH, 'stuff')]
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
-                                              "--silent", directories[0])
+                                              "--silent", directories[0]).and_return(true)
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
-                                              "--silent", directories[1])
+                                              "--silent", directories[1]).and_return(true)
       Action.run({dsym_path: [dsym1, dsym2, dsym3, dsym4]})
     end
 
@@ -69,7 +82,7 @@ describe Action do
       dsym2 = File.join(FIXTURE_PATH, 'dSYMs/app2.dSYM')
       directory = File.join(FIXTURE_PATH, 'dSYMs')
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
-                                              "--silent", directory)
+                                              "--silent", directory).and_return(true)
       Action.run({dsym_path: [dsym1, dsym2]})
     end
 
@@ -78,7 +91,7 @@ describe Action do
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
                                               "--silent",
                                               "--project-root", root_path,
-                                              FIXTURE_PATH)
+                                              FIXTURE_PATH).and_return(true)
       Action.run({dsym_path: FIXTURE_PATH, project_root: root_path})
     end
 
@@ -87,7 +100,7 @@ describe Action do
         expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
                                                 "--silent",
                                                 "--upload-server", "http://myserver.example.com",
-                                                FIXTURE_PATH)
+                                                FIXTURE_PATH).and_return(true)
         Action.run({dsym_path: FIXTURE_PATH,
                     upload_url: "http://myserver.example.com"})
       end
@@ -99,7 +112,7 @@ describe Action do
         expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
                                                 "--silent",
                                                 "--symbol-maps", path,
-                                                FIXTURE_PATH)
+                                                FIXTURE_PATH).and_return(true)
         Action.run({dsym_path: FIXTURE_PATH, symbol_maps_path: path})
       end
     end
