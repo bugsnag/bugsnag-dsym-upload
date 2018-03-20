@@ -157,4 +157,5 @@ fi
 
 if [ $fail_count -gt 0 ]; then
     log "$fail_count files failed to upload"
+    exit 1
 fi

@@ -8,9 +8,13 @@ module Fastlane
       def self.run(params)
         parse_dsym_paths(params[:dsym_path]).each do |dsym_path|
           if dsym_path.end_with?(".zip") or File.directory?(dsym_path)
-            args = upload_args(dsym_path, params[:symbol_maps_path], params[:upload_url], params[:project_root])
+            args = upload_args(dsym_path, params[:symbol_maps_path], params[:upload_url], params[:project_root], params[:verbose])
             success = Kernel.system(UPLOAD_SCRIPT_PATH, *args)
-            UI.success("Uploaded dSYMs in #{dsym_path}") if success
+            if success
+              UI.success("Uploaded dSYMs in #{dsym_path}")
+            else
+              UI.user_error!("Failed uploading #{dsym_path}")
+            end
           else
             UI.user_error!("The specified symbol file path cannot be used: #{dsym_path}")
           end
@@ -78,14 +82,19 @@ module Fastlane
                                        env_name: "BUGSNAG_PROJECT_ROOT",
                                        description: "Root path of the project",
                                        default_value: Dir::pwd,
-                                       optional: true)
+                                       optional: true),
+          FastlaneCore::ConfigItem.new(key: :verbose,
+                                       env_name: "BUGSNAG_VERBOSE",
+                                       description: "Print helpful debug info",
+                                       skip_type_validation: true,
+                                       optional: true),
         ]
       end
 
       private
 
-      def self.upload_args dir, symbol_maps_dir, upload_url, project_root
-        args = ["--silent"]
+      def self.upload_args dir, symbol_maps_dir, upload_url, project_root, verbose
+        args = [verbose ? "--verbose" : "--silent"]
         args += ["--upload-server", upload_url] unless upload_url.nil?
         args += ["--symbol-maps", symbol_maps_dir] unless symbol_maps_dir.nil?
         args += ["--project-root", project_root] unless project_root.nil?
