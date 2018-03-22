@@ -1,3 +1,11 @@
+## TBD
+
+### Bug fixes
+
+* Change format of temp directory generation to support running on Linux
+  [#15](https://github.com/bugsnag/bugsnag-dsym-upload/pull/15)
+  [#14](https://github.com/bugsnag/bugsnag-dsym-upload/issues/14)
+
 ## 1.3.1 (2018-03-07)
 
 ### Bug fixes

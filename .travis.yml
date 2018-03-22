@@ -1,11 +1,37 @@
-sudo: false
-language: ruby
-cache: bundler
-rvm:
-- 2.4.1
+cache:
+  directories:
+  - vendor/fastlane-bundle
+  - vendor/bundle
 
-before_install:
-- gem --version
+install: true
 
-script:
-- make ci
+jobs:
+  include:
+    - stage: test
+      os: linux
+      language: ruby
+      dist: trusty
+      sudo: false
+      before_install:
+      - sudo apt-get -qq update
+      - sudo apt-get install -y llvm
+      - sudo ln -s $(which llvm-dwarfdump) $(dirname $(which llvm-dwarfdump))/dwarfdump
+      before_script:
+      - "mkdir -p vendor/{fastlane-bundle,bundle}"
+      - bundle config path vendor/fastlane-bundle
+      - bundle install --gemfile=tools/fastlane-plugin/Gemfile
+      - export BUNDLE_GEMFILE=
+      script:
+      - cd tools/fastlane-plugin && bundle exec rake spec
+    - stage: test
+      os: osx
+      osx_image: xcode9
+      script:
+      - export BUNDLE_GEMFILE=
+      - "mkdir -p vendor/{fastlane-bundle,bundle}"
+      - bundle config path vendor/bundle
+      - bundle install --gemfile=Gemfile
+      - bundle exec maze-runner
+      - bundle config path vendor/fastlane-bundle
+      - bundle install --gemfile=tools/fastlane-plugin/Gemfile
+      - cd tools/fastlane-plugin && bundle exec rake spec
