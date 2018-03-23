@@ -1,10 +1,14 @@
-## TBD
+## 1.3.2 (2018-03-23)
 
 ### Bug fixes
 
 * Change format of temp directory generation to support running on Linux
   [#15](https://github.com/bugsnag/bugsnag-dsym-upload/pull/15)
   [#14](https://github.com/bugsnag/bugsnag-dsym-upload/issues/14)
+
+* Halt when attempting to upload the contents of a malformed zip file
+  [Philihp Busby](https://github.com/philihp)
+  [#13](https://github.com/bugsnag/bugsnag-dsym-upload/pull/13)
 
 ## 1.3.1 (2018-03-07)
 
