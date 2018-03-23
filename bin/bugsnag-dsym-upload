@@ -101,7 +101,7 @@ if [[ ! -d $dsym_dir ]]; then
         if [[ ! -x "$(command -v unzip 2>/dev/null)" ]]; then
             exit_with_usage "unzip command not found."
         fi
-        temp_dir=$(mktemp -dt "bugsnag-dsym-upload")
+        temp_dir=$(mktemp -dt "bugsnag-dsym-upload.XXX")
         unzip -qq $dsym_dir -d $temp_dir
         dsym_dir=$temp_dir
     else

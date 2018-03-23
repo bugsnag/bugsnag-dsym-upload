@@ -1,3 +1,5 @@
 tools/fastlane-plugin/bin/bugsnag-dsym-upload
 tools/fastlane-plugin/Gemfile.lock
+maze_output
+vendor
 *.gem
