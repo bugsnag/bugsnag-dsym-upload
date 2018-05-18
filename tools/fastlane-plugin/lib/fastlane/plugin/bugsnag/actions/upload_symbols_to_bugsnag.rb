@@ -43,7 +43,6 @@ module Fastlane
 
       def self.available_options
         validate_dsym_path = proc do |value|
-          value = [value] unless value.is_a? Array
           value.each do |path|
             unless File.exist?(path)
               UI.user_error!("Could not find file at path '#{File.expand_path(path)}'")
@@ -62,6 +61,7 @@ module Fastlane
         end
         [
           FastlaneCore::ConfigItem.new(key: :dsym_path,
+                                       type: Array,
                                        env_name: "BUGSNAG_DSYM_PATH",
                                        description: "Path to the DSYM directory, file, or zip to upload",
                                        default_value: default_dsym_path,
