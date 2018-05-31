@@ -31,7 +31,7 @@ jobs:
       - "mkdir -p vendor/{fastlane-bundle,bundle}"
       - bundle config path vendor/bundle
       - bundle install --gemfile=Gemfile
-      - bundle exec maze-runner
+      - bundle exec maze-runner features/*.feature
       - bundle config path vendor/fastlane-bundle
       - bundle install --gemfile=tools/fastlane-plugin/Gemfile
       - cd tools/fastlane-plugin && bundle exec rake spec
