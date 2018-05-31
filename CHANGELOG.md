@@ -1,3 +1,11 @@
+## TBD
+
+### Bug fixes
+
+* (fastlane) Support both arrays and strings as the value of `dsym_path` for
+  `upload_symbols_to_bugsnag`
+  [#18](https://github.com/bugsnag/bugsnag-dsym-upload/pull/18)
+
 ## 1.3.2 (2018-03-23)
 
 ### Bug fixes
