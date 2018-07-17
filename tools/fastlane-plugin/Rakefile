@@ -1,10 +1,7 @@
-require 'rspec/core/rake_task'
-RSpec::Core::RakeTask.new
-
-require 'rubocop/rake_task'
-RuboCop::RakeTask.new(:rubocop)
-
-task default: [:spec, :rubocop]
+desc "Run the unit tests"
+task :spec do
+  system("rspec")
+end
 
 desc "Build the gem"
 task :build do
@@ -29,3 +26,5 @@ task :release => :build do
   require_relative 'lib/fastlane/plugin/bugsnag/version'
   system("gem push fastlane-plugin-bugsnag-#{Fastlane::Bugsnag::VERSION}.gem")
 end
+
+task default: :spec
