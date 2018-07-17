@@ -7,6 +7,11 @@
 * [Make a pull request](https://help.github.com/articles/using-pull-requests)
 * Thanks!
 
+## Running the tests
+
+Install the dependencies with `make bootstrap`, then run the unit and
+integration suites with `make test`
+
 ## Releasing a new version
 
 1. Update the CHANGELOG with new content
@@ -19,5 +24,5 @@
 4. Tag the release
 5. Push
    * Create a new GitHub release with the changes
-   * Update the fastlane-plugin-bugsnag gem
+   * Open `tools/fastlane-plugin` and run `rake release`
 6. Update the documentation as needed on docs.bugsnag.com

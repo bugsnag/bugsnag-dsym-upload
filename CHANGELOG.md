@@ -1,3 +1,8 @@
+## TBD
+
+The v1.3.3 version of the gem was packaged incorrectly, leading to the fastlane
+plugin being unable to upload dSYMs.
+
 ## 1.3.3 (2018-07-11)
 
 ### Bug fixes
