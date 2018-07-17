@@ -19,5 +19,5 @@
 4. Tag the release
 5. Push
    * Create a new GitHub release with the changes
-   * Update the fastlane-plugin-bugsnag gem
+   * Open `tools/fastlane-plugin` and run `rake release`
 6. Update the documentation as needed on docs.bugsnag.com

@@ -1,5 +1,3 @@
-require 'bundler/gem_tasks'
-
 require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new
 
@@ -7,3 +5,27 @@ require 'rubocop/rake_task'
 RuboCop::RakeTask.new(:rubocop)
 
 task default: [:spec, :rubocop]
+
+desc "Build the gem"
+task :build do
+  # Copy required files into the gem
+  puts "Assembling gem files..."
+  gem_dir = File.dirname(__FILE__)
+  bin_file = File.join(gem_dir, '..', '..', 'bin', 'bugsnag-dsym-upload')
+  license = File.join(gem_dir, '..', '..', 'LICENSE.txt')
+  cp bin_file, gem_dir
+  cp license, gem_dir
+
+  system("gem build fastlane-plugin-bugsnag.gemspec")
+
+  # Clean up
+  puts "Cleaning up temporary files..."
+  rm File.join(gem_dir, 'LICENSE.txt')
+  rm File.join(gem_dir, 'bugsnag-dsym-upload')
+end
+
+desc "Release the latest version to RubyGems"
+task :release => :build do
+  require_relative 'lib/fastlane/plugin/bugsnag/version'
+  system("gem push fastlane-plugin-bugsnag-#{Fastlane::Bugsnag::VERSION}.gem")
+end

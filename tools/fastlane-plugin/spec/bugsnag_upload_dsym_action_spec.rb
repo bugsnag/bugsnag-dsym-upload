@@ -4,8 +4,19 @@ Action = Fastlane::Actions::UploadSymbolsToBugsnagAction
 
 describe Action do
 
-  it 'has an executable upload script' do
-    expect(File.exist?(Action::UPLOAD_SCRIPT_PATH)).to be true
+  context "the packaged gem" do
+    gem_name = "fastlane-plugin-bugsnag-#{Fastlane::Bugsnag::VERSION}"
+
+    after do
+      FileUtils.rm_rf(gem_name)
+      FileUtils.rm_rf("#{gem_name}.gem")
+    end
+
+    it 'has an executable upload script' do
+      system('rake build')
+      system("gem unpack #{gem_name}.gem")
+      expect(File.exist?(File.join("#{gem_name}/bugsnag-dsym-upload"))).to be true
+    end
   end
 
   describe '#run' do

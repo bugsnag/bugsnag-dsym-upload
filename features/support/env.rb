@@ -1,4 +1,7 @@
 Bundler.with_clean_env do
+  Dir.chdir 'tools/fastlane-plugin' do
+    `rake build`
+  end
   Dir.chdir 'features/fixtures/fl-project' do
     `bundle install`
   end
