@@ -14,13 +14,21 @@ $(MANDIR)/man1/$(PROJECT).1: man/$(PROJECT).pod
 	@pod2man --center $(PROJECT) --release $(VERSION) man/$(PROJECT).pod > $@
 	@chmod 444 $@
 
-.PHONY: features
+.PHONY: boostrap uninstall test test_unit test_features
 
 install: $(BINDIR)/$(PROJECT) $(MANDIR)/man1/$(PROJECT).1
 
 uninstall:
 	@rm $(BINDIR)/$(PROJECT) $(MANDIR)/man1/$(PROJECT).1
 
-test:
+bootstrap:
+	@bundle install
+	@cd tools/fastlane-plugin && bundle install
+
+test_unit:
 	@cd tools/fastlane-plugin && bundle exec rake spec
-	@bundle exec maze-runner
+
+test_features:
+	@bundle exec maze-runner -c features/*.feature
+
+test: test_unit test_features

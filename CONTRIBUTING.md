@@ -7,6 +7,11 @@
 * [Make a pull request](https://help.github.com/articles/using-pull-requests)
 * Thanks!
 
+## Running the tests
+
+Install the dependencies with `make bootstrap`, then run the unit and
+integration suites with `make test`
+
 ## Releasing a new version
 
 1. Update the CHANGELOG with new content
