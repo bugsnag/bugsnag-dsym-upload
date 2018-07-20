@@ -14,7 +14,7 @@ $(MANDIR)/man1/$(PROJECT).1: man/$(PROJECT).pod
 	@pod2man --center $(PROJECT) --release $(VERSION) man/$(PROJECT).pod > $@
 	@chmod 444 $@
 
-.PHONY: boostrap uninstall test test_unit test_features
+.PHONY: bootstrap uninstall test test_unit test_features
 
 install: $(BINDIR)/$(PROJECT) $(MANDIR)/man1/$(PROJECT).1
 
