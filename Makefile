@@ -1,3 +1,5 @@
+all: test_unit
+
 PROJECT = bugsnag-dsym-upload
 VERSION = $(shell cat VERSION)
 BINDIR := '/usr/local/bin'
