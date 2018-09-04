@@ -20,6 +20,8 @@ function print_usage() {
     echo "                    upload. Requires dsymutil."
     echo "--upload-server URL The server receiving dSYM files. Set this value if"
     echo "                    using an on-premise Bugsnag installation"
+    echo "--api-key API_KEY   The API key of the project the dSYM should be applied to"
+    echo "                    If not provided, the dSYM can used for any Bugsnag project"
     echo "--project-root DIR  The root directory of the project. This will help to"
     echo "                    group error reports by project"
     echo "dSYMS_PATH          A directory or .zip file containing *.dSYM bundles to"
@@ -69,6 +71,10 @@ while [[ $# -gt 0 ]]; do
             shift;;
         --upload-server)
             upload_server=$2
+            shift
+            shift;;
+        --api-key)
+            api_key=$2
             shift
             shift;;
         --project-root)
@@ -131,11 +137,18 @@ for dsym in $dsym_dir/*.dSYM; do
         uuid=$(dwarfdump -u $file 2>/dev/null)
         if [[ $uuid == UUID* ]]; then
             log Uploading $uuid
+
+            arg=""
             if [[ ! -z $project_root ]]; then
-                output=$(curl --silent --show-error $upload_server -F dsym=@\"$file\" -F projectRoot=$project_root)
-            else
-                output=$(curl --silent --show-error $upload_server -F dsym=@\"$file\")
+                args="-F projectRoot=$project_root "
             fi
+
+            if [[ ! -z $api_key ]]; then
+                args="$args-F apiKey=$api_key"
+            fi
+            curl_cmd="curl --silent --show-error $upload_server -F dsym=@\"$file\" $args"
+            output=$(sh -c "$curl_cmd")
+
             if [ $? -eq 0 ]; then
                 success_count=$((success_count+1))
             else

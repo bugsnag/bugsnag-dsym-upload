@@ -63,6 +63,11 @@ will be updated with symbols prior to upload. Requires dsymutil.
 The server receiving dSYM files. Set this value if using an on-premise Bugsnag
 installation. Defaults to I<https://upload.bugsnag.com>
 
+=item --api-key API_KEY
+
+The API Key associated with the project. Informs Bugsnag which project this dSYM should
+be applied to. If not provided, the dSYM can be applied to any Bugsnag project.
+
 =item I<-s>, --silent
 
 Silence all script output aside from errors
