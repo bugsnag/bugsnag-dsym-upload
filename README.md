@@ -50,7 +50,7 @@ end
 
 Common options:
 
-* `api_key`: The API Key associated with the project. Informs Bugsnag which project 
+* `api_key`: The API key associated with the project. Informs Bugsnag which project 
   this dSYM should be applied to.
 * `dsym_path`: A path or array of paths for directories containing \*.dSYM files
   or a single \*.zip file to upload. If unspecified, the default behavior is to
