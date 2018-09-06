@@ -131,10 +131,10 @@ module Fastlane
 
       def self.upload_args dir, symbol_maps_dir, upload_url, project_root, api_key, verbose
         args = [verbose ? "--verbose" : "--silent"]
+        args += ["--api-key", api_key] unless api_key.nil?
         args += ["--upload-server", upload_url] unless upload_url.nil?
         args += ["--symbol-maps", symbol_maps_dir] unless symbol_maps_dir.nil?
         args += ["--project-root", project_root] unless project_root.nil?
-        args += ["--api-key", api_key] unless api_key.nil?
         args << dir
         args
       end
