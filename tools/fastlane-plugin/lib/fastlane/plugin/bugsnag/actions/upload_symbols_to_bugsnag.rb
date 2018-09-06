@@ -7,15 +7,10 @@ module Fastlane
 
       def self.run(params)
         options = {}
-        if lane_context[:PLATFORM_NAME] == :android
-          options.merge!(options_from_android_manifest(params[:config_file])) if params[:config_file]
-        else
-          options.merge!(options_from_info_plist(params[:config_file])) if params[:config_file]
-        end
+        options = options_from_info_plist(params[:config_file]) if params[:config_file]
 
-        if (lane_context[:PLATFORM_NAME] == :android and params[:config_file] == default_android_manifest_path) or
-           (lane_context[:PLATFORM_NAME] != :android and params[:config_file] == default_info_plist_path)
-          # Load custom API key and version properties only if config file has not been overridden
+        if (params[:config_file] == default_info_plist_path)
+          # Load custom API key if config file has not been overridden
           options[:apiKey] = params[:api_key] unless params[:api_key].nil?
         else
           # Print which file is populating version and API key information since the value has been
@@ -77,7 +72,8 @@ module Fastlane
           end
         end
 
-        options = load_default_values
+        options = {}
+        options = options_from_info_plist(default_info_plist_path) if file_path = default_info_plist_path
         [
           FastlaneCore::ConfigItem.new(key: :api_key,
                                        env_name: "BUGSNAG_API_KEY",
@@ -108,7 +104,7 @@ module Fastlane
                                        default_value: nil,
                                        optional: true),
           FastlaneCore::ConfigItem.new(key: :config_file,
-                                       description: "AndroidManifest.xml/Info.plist location",
+                                       description: "Info.plist location",
                                        optional: true,
                                        default_value: options[:config_file]),
           FastlaneCore::ConfigItem.new(key: :verbose,
@@ -121,44 +117,6 @@ module Fastlane
 
       private
 
-      def self.load_default_values
-        options = {}
-        case lane_context[:PLATFORM_NAME]
-        when nil
-          if file_path = default_android_manifest_path
-            options.merge!(load_default_android_values(file_path))
-          elsif file_path = default_info_plist_path
-            options.merge!(options_from_info_plist(file_path))
-          end
-        when :android
-          if file_path = default_android_manifest_path
-            options.merge!(load_default_android_values(file_path))
-          end
-        else
-          if file_path = default_info_plist_path
-            options.merge!(options_from_info_plist(file_path))
-          end
-        end
-        options
-      end
-
-      def self.load_default_android_values file_path
-        options = {}
-        begin
-          meta_data = parse_android_manifest_options(XmlSimple.xml_in(file_path))
-          options[:apiKey] = meta_data["com.bugsnag.android.API_KEY"]
-          
-        rescue ArgumentError
-          nil
-        end
-        options[:config_file] = file_path
-        options
-      end
-
-      def self.default_android_manifest_path
-        Dir.glob("./{android/,}{app,}/src/main/AndroidManifest.xml").first
-      end
-
       def self.default_info_plist_path
         Dir.glob("./{ios/,}*/Info.plist").reject {|path| path =~ /build|test/i }.first
       end
@@ -169,35 +127,6 @@ module Fastlane
           apiKey: plist_getter.run(path: file_path, key: "BugsnagAPIKey"),
           config_file: file_path,
         }
-      end
-
-      def self.parse_android_manifest_options config_hash
-        map_meta_data(get_meta_data(config_hash))
-      end
-
-      def self.get_meta_data(object, output = [])
-        if object.is_a?(Array)
-          object.each do |item|
-            output = get_meta_data(item, output)
-          end
-        elsif object.is_a?(Hash)
-          object.each do |key, value|
-            if key === "meta-data"
-              output << value
-            elsif value.is_a?(Array) || value.is_a?(Hash)
-              output = get_meta_data(value, output)
-            end
-          end
-        end
-        output.flatten
-      end
-
-      def self.map_meta_data(meta_data)
-        output = {}
-        meta_data.each do |hash|
-          output[hash["android:name"]] = hash["android:value"]
-        end
-        output
       end
 
       def self.upload_args dir, symbol_maps_dir, upload_url, project_root, api_key, verbose
