@@ -137,6 +137,7 @@ for dsym in $dsym_dir/*.dSYM; do
         if [[ $uuid == UUID* ]]; then
             log Uploading $uuid
 
+            # Attach the api key and project root parameters if they have been provided
             arg=""
             if [[ ! -z $project_root ]]; then
                 args="-F projectRoot=$project_root "
@@ -145,6 +146,9 @@ for dsym in $dsym_dir/*.dSYM; do
             if [[ ! -z $api_key ]]; then
                 args="$args-F apiKey=$api_key"
             fi
+
+            # We need to shell out to perform the curl as there seems to be some indirect
+            # wrapping of this script causes the command to fail if called directly.
             curl_cmd="curl --silent --show-error $upload_server -F dsym=@\"$file\" $args"
             output=$(sh -c "$curl_cmd")
 
