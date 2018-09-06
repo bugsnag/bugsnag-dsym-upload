@@ -79,6 +79,11 @@ module Fastlane
 
         options = load_default_values
         [
+          FastlaneCore::ConfigItem.new(key: :api_key,
+                                       env_name: "BUGSNAG_API_KEY",
+                                       description: "Bugsnag API Key",
+                                       optional: true,
+                                       default_value: options[:apiKey]),
           FastlaneCore::ConfigItem.new(key: :dsym_path,
                                        type: Array,
                                        env_name: "BUGSNAG_DSYM_PATH",
@@ -102,11 +107,6 @@ module Fastlane
                                        description: "Root path of the project",
                                        default_value: nil,
                                        optional: true),
-          FastlaneCore::ConfigItem.new(key: :api_key,
-                                       env_name: "BUGSNAG_API_KEY",
-                                       description: "Bugsnag API Key",
-                                       optional: true,
-                                       default_value: options[:apiKey]),
           FastlaneCore::ConfigItem.new(key: :config_file,
                                        description: "AndroidManifest.xml/Info.plist location",
                                        optional: true,
@@ -116,7 +116,6 @@ module Fastlane
                                        description: "Print helpful debug info",
                                        skip_type_validation: true,
                                        optional: true),
-
         ]
       end
 
