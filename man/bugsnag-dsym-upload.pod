@@ -8,7 +8,8 @@
 
     bugsnag-dsym-upload [--verbose] [--api-key API_KEY]
                                     [--upload-server URL]
-                                    [--symbol-maps MAP_DIR] dSYMS_PATH
+                                    [--symbol-maps MAP_DIR] 
+                                    [--project-root DIR] dSYMS_PATH
     bugsnag-dsym-upload --help
 
 =head1 DESCRIPTION
@@ -68,6 +69,10 @@ will be updated with symbols prior to upload. Requires dsymutil.
 
 The server receiving dSYM files. Set this value if using an on-premise Bugsnag
 installation. Defaults to I<https://upload.bugsnag.com>
+
+=item --project-root DIR
+
+The root directory of the project. This will help to group error reports by project
 
 =item I<-s>, --silent
 

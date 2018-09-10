@@ -52,6 +52,7 @@ unset dsym_dir
 unset verbose
 unset silent
 unset project_root
+unset api_key
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -138,7 +139,7 @@ for dsym in $dsym_dir/*.dSYM; do
             log Uploading $uuid
 
             # Attach the api key and project root parameters if they have been provided
-            arg=""
+            args=""
             if [[ ! -z $project_root ]]; then
                 args="-F projectRoot=$project_root "
             fi
@@ -148,7 +149,7 @@ for dsym in $dsym_dir/*.dSYM; do
             fi
 
             # We need to shell out to perform the curl as there seems to be some indirect
-            # wrapping of this script causes the command to fail if called directly.
+            # wrapping of this script which causes the command to fail if called directly.
             curl_cmd="curl --silent --show-error $upload_server -F dsym=@\"$file\" $args"
             output=$(sh -c "$curl_cmd")
 

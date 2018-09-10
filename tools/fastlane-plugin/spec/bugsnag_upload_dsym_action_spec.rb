@@ -125,6 +125,15 @@ describe Action do
       Action.run(load_default_opts.merge({dsym_path: FIXTURE_PATH, api_key: api_key}))
     end
 
+    it 'accepts an API key argument with no project root' do
+      api_key = "1234567890ABCDE"
+      expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
+                                              "--silent",
+                                              "--api-key", api_key,
+                                              FIXTURE_PATH).and_return(true)
+      Action.run(load_default_opts.merge({dsym_path: FIXTURE_PATH, api_key: api_key, project_root: nil}))
+    end
+
     it 'uses default API key argument from plist' do
       root_path = "/test/test/test"
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
