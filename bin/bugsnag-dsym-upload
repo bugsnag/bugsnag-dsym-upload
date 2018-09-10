@@ -152,7 +152,7 @@ for dsym in $dsym_dir/*.dSYM; do
             curl_cmd="curl --silent --show-error $upload_server -F dsym=@\"$file\" $args"
             output=$(sh -c "$curl_cmd")
 
-            if [ $? -eq 0 ]; then
+            if [ $? -eq 0 ] && [ "$output" != "invalid apiKey" ]; then
                 success_count=$((success_count+1))
             else
                 fail_count=$((fail_count+1))
