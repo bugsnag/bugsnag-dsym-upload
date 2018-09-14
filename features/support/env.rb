@@ -7,7 +7,7 @@ end
 Bundler.with_clean_env do
   Dir.chdir 'features/fixtures/fl-project' do
     gem_path = Dir['../../../tools/fastlane-plugin/fastlane-plugin-bugsnag-*.gem'].last
-    `bundle config path vendor`
+    `bundle config --local path vendor`
     `bundle install --gemfile=Gemfile`
     `gem install #{gem_path} -i vendor`
   end
