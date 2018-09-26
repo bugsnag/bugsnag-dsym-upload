@@ -19,3 +19,31 @@ Feature: Uploading dSYMs to Bugsnag using Fastlane
         Then I should receive 2 requests
         And the part "dsym" for request 0 is not null
         And the part "dsym" for request 1 is not null
+
+    Scenario: Uploading dSYMs using API key and config file together uses api key from config file
+        When I run lane "upload_symbols" with dsym_path set to "dsyms.zip", api_key set to "1234567890abcde" and config_file set to "TestList.plist"
+        Then I should receive 2 requests
+        And the part "dsym" for request 0 is not null
+        And the part "apiKey" for request 0 equals "random-key"
+        And the part "dsym" for request 1 is not null
+        And the part "apiKey" for request 1 equals "random-key"
+
+    Scenario: Uploading dSYMs using API key and empty config file
+        When I run lane "upload_symbols" with dsym_path set to "dsyms.zip", api_key set to "1234567890abcde" and config_file set to "NoApiKey.plist"
+        Then I should receive 2 requests
+        And the part "dsym" for request 0 is not null
+        And the part "apiKey" for request 0 equals "1234567890abcde"
+        And the part "dsym" for request 1 is not null
+        And the part "apiKey" for request 1 equals "1234567890abcde"
+
+    Scenario: Uploading dSYMs with an invalid API key as a parameter
+        When I run lane "upload_symbols_with_api_key" with dsym_path set to "dsyms/" and api_key set to "invalid-key"
+        Then I should receive 0 requests
+
+    Scenario: Uploading dSYMs with an valid API key as a parameter
+        When I run lane "upload_symbols_with_api_key" with dsym_path set to "dsyms/" and api_key set to "1234567890ABCDEF1234567890ABCDEF"
+        Then I should receive 2 requests
+        And the part "dsym" for request 0 is not null
+        And the part "apiKey" for request 0 equals "1234567890ABCDEF1234567890ABCDEF"
+        And the part "dsym" for request 1 is not null
+        And the part "apiKey" for request 1 equals "1234567890ABCDEF1234567890ABCDEF"

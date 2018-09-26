@@ -9,8 +9,8 @@ module Fastlane
         options = {}
         options = options_from_info_plist(params[:config_file]) if params[:config_file]
 
-        if (params[:config_file] == default_info_plist_path)
-          # Load custom API key if config file has not been overridden
+        if (params[:config_file] == default_info_plist_path || options[:apiKey].nil? || options[:apiKey].empty?)
+          # Load custom API key if config file has not been overridden or the API key couldn't be found in config files
           options[:apiKey] = params[:api_key] unless params[:api_key].nil?
         else
           # Print which file is populating version and API key information since the value has been
@@ -71,6 +71,14 @@ module Fastlane
             UI.user_error!("Symbol maps file needs to be a directory containing symbol map files")
           end
         end
+        validate_api_key = proc do |key|
+          puts "VALIDATING #{key}"
+          return if key.nil?
+
+          unless !key[/\H/] and key.length == 32
+            UI.user_error!("API key should be a 32 character hexdeciaml string")
+          end
+        end
 
         options = {}
         options = options_from_info_plist(default_info_plist_path) if file_path = default_info_plist_path
@@ -79,7 +87,8 @@ module Fastlane
                                        env_name: "BUGSNAG_API_KEY",
                                        description: "Bugsnag API Key",
                                        optional: true,
-                                       default_value: options[:apiKey]),
+                                       default_value: options[:apiKey],
+                                       verify_block: validate_api_key),
           FastlaneCore::ConfigItem.new(key: :dsym_path,
                                        type: Array,
                                        env_name: "BUGSNAG_DSYM_PATH",

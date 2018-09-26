@@ -59,6 +59,9 @@ Common options:
   any .dSYM files within the current directory.
 * `upload_url`: The URL of the server receiving symbol files. Update this value
   if you are using a private instance of Bugsnag
+* `config_file`: The path to the project's Info.plist. Set this value if your configuration file 
+  is not automatically detected. If set the API key read from this configuration 
+  file overrides the `api_key` option
 
 View usage additional usage information and options by running `fastlane action
 upload_symbols_to_bugsnag`.
