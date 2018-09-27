@@ -72,7 +72,6 @@ module Fastlane
           end
         end
         validate_api_key = proc do |key|
-          puts "VALIDATING #{key}"
           return if key.nil?
 
           unless !key[/\H/] and key.length == 32
