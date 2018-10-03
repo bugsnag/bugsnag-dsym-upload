@@ -15,6 +15,7 @@ function print_usage() {
     echo
     echo "-h, --help          Displays this message"
     echo "-v, --verbose       Print verbose logging output during execution"
+    echo "--api-key API_KEY   The API key of the project the dSYM should be applied to"
     echo "--symbol-maps DIR   Path to a directory of bitcode symbol maps. The"
     echo "                    dSYM files will be restored with symbols prior to"
     echo "                    upload. Requires dsymutil."
@@ -51,6 +52,7 @@ unset dsym_dir
 unset verbose
 unset silent
 unset project_root
+unset api_key
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -69,6 +71,10 @@ while [[ $# -gt 0 ]]; do
             shift;;
         --upload-server)
             upload_server=$2
+            shift
+            shift;;
+        --api-key)
+            api_key=$2
             shift
             shift;;
         --project-root)
@@ -131,12 +137,23 @@ for dsym in $dsym_dir/*.dSYM; do
         uuid=$(dwarfdump -u $file 2>/dev/null)
         if [[ $uuid == UUID* ]]; then
             log Uploading $uuid
+
+            # Attach the api key and project root parameters if they have been provided
+            args=""
             if [[ ! -z $project_root ]]; then
-                output=$(curl --silent --show-error $upload_server -F dsym=@\"$file\" -F projectRoot=$project_root)
-            else
-                output=$(curl --silent --show-error $upload_server -F dsym=@\"$file\")
+                args="-F projectRoot=$project_root "
             fi
-            if [ $? -eq 0 ]; then
+
+            if [[ ! -z $api_key ]]; then
+                args="$args-F apiKey=$api_key"
+            fi
+
+            # We need to shell out to perform the curl as there seems to be some indirect
+            # wrapping of this script which causes the command to fail if called directly.
+            curl_cmd="curl --silent --show-error $upload_server -F dsym=@\"$file\" $args"
+            output=$(sh -c "$curl_cmd")
+
+            if [ $? -eq 0 ] && [ "$output" != "invalid apiKey" ]; then
                 success_count=$((success_count+1))
             else
                 fail_count=$((fail_count+1))

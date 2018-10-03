@@ -50,6 +50,8 @@ end
 
 Common options:
 
+* `api_key`: The API key associated with the project. Informs Bugsnag which project 
+  this dSYM should be applied to.
 * `dsym_path`: A path or array of paths for directories containing \*.dSYM files
   or a single \*.zip file to upload. If unspecified, the default behavior is to
   upload the zip files retrieved by a prior invocation of
@@ -57,6 +59,9 @@ Common options:
   any .dSYM files within the current directory.
 * `upload_url`: The URL of the server receiving symbol files. Update this value
   if you are using a private instance of Bugsnag
+* `config_file`: The path to the project's Info.plist. Set this value if your configuration file 
+  is not automatically detected. If set the API key read from this configuration 
+  file overrides the `api_key` option
 
 View usage additional usage information and options by running `fastlane action
 upload_symbols_to_bugsnag`.

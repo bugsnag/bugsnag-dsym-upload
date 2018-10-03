@@ -2,21 +2,24 @@ default_platform(:ios)
 
 endpoint = ENV['BUGSNAG_ENDPOINT']
 api_key = ENV['BUGSNAG_API_KEY']
+config_file = ENV['BUGSNAG_CONFIG_FILE']
 
 platform :ios do
-  desc "Description of what the lane does"
   lane :send_build do
     send_build_to_bugsnag(upload_url: endpoint, api_key: api_key)
   end
 
-  desc "Description of what the lane does"
   lane :upload_symbols do
-    if dsym_path = ENV['BUGSNAG_DSYM_PATH']
-      # Test uploading arrays
-      dsym_path = dsym_path.split(',') if dsym_path.include? ','
-      puts "SPLIT PATH: #{dsym_path}"
+    if config_file.nil?
+      upload_symbols_to_bugsnag(upload_url: endpoint)
+    else
+      upload_symbols_to_bugsnag(upload_url: endpoint, config_file: config_file)
     end
+  end
 
-    upload_symbols_to_bugsnag(upload_url: endpoint, dsym_path: dsym_path)
+  lane :upload_symbols_with_api_key do
+    upload_symbols_to_bugsnag(upload_url: endpoint, api_key: api_key)
   end
 end
+
+

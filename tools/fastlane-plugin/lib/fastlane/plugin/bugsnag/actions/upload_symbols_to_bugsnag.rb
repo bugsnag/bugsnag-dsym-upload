@@ -6,9 +6,21 @@ module Fastlane
         File.join(File.dirname(__FILE__), '..', '..', '..', '..', '..', 'bugsnag-dsym-upload'))
 
       def self.run(params)
+        options = {}
+        options = options_from_info_plist(params[:config_file]) if params[:config_file]
+
+        if (params[:config_file] == default_info_plist_path || options[:apiKey].nil? || options[:apiKey].empty?)
+          # Load custom API key if config file has not been overridden or the API key couldn't be found in config files
+          options[:apiKey] = params[:api_key] unless params[:api_key].nil?
+        else
+          # Print which file is populating version and API key information since the value has been
+          # overridden
+          UI.message("Loading API key from #{params[:config_file]}")
+        end
+
         parse_dsym_paths(params[:dsym_path]).each do |dsym_path|
           if dsym_path.end_with?(".zip") or File.directory?(dsym_path)
-            args = upload_args(dsym_path, params[:symbol_maps_path], params[:upload_url], params[:project_root], params[:verbose])
+            args = upload_args(dsym_path, params[:symbol_maps_path], params[:upload_url], params[:project_root], options[:apiKey], params[:verbose])
             success = Kernel.system(UPLOAD_SCRIPT_PATH, *args)
             if success
               UI.success("Uploaded dSYMs in #{dsym_path}")
@@ -59,7 +71,23 @@ module Fastlane
             UI.user_error!("Symbol maps file needs to be a directory containing symbol map files")
           end
         end
+        validate_api_key = proc do |key|
+          return if key.nil?
+
+          unless !key[/\H/] and key.length == 32
+            UI.user_error!("API key should be a 32 character hexdeciaml string")
+          end
+        end
+
+        options = {}
+        options = options_from_info_plist(default_info_plist_path) if file_path = default_info_plist_path
         [
+          FastlaneCore::ConfigItem.new(key: :api_key,
+                                       env_name: "BUGSNAG_API_KEY",
+                                       description: "Bugsnag API Key",
+                                       optional: true,
+                                       default_value: options[:apiKey],
+                                       verify_block: validate_api_key),
           FastlaneCore::ConfigItem.new(key: :dsym_path,
                                        type: Array,
                                        env_name: "BUGSNAG_DSYM_PATH",
@@ -83,6 +111,10 @@ module Fastlane
                                        description: "Root path of the project",
                                        default_value: Dir::pwd,
                                        optional: true),
+          FastlaneCore::ConfigItem.new(key: :config_file,
+                                       description: "Info.plist location",
+                                       optional: true,
+                                       default_value: options[:config_file]),
           FastlaneCore::ConfigItem.new(key: :verbose,
                                        env_name: "BUGSNAG_VERBOSE",
                                        description: "Print helpful debug info",
@@ -93,8 +125,21 @@ module Fastlane
 
       private
 
-      def self.upload_args dir, symbol_maps_dir, upload_url, project_root, verbose
+      def self.default_info_plist_path
+        Dir.glob("./{ios/,}*/Info.plist").reject {|path| path =~ /build|test/i }.first
+      end
+
+      def self.options_from_info_plist file_path
+        plist_getter = Fastlane::Actions::GetInfoPlistValueAction
+        {
+          apiKey: plist_getter.run(path: file_path, key: "BugsnagAPIKey"),
+          config_file: file_path,
+        }
+      end
+
+      def self.upload_args dir, symbol_maps_dir, upload_url, project_root, api_key, verbose
         args = [verbose ? "--verbose" : "--silent"]
+        args += ["--api-key", api_key] unless api_key.nil?
         args += ["--upload-server", upload_url] unless upload_url.nil?
         args += ["--symbol-maps", symbol_maps_dir] unless symbol_maps_dir.nil?
         args += ["--project-root", project_root] unless project_root.nil?
@@ -110,9 +155,10 @@ module Fastlane
       end
 
       def self.default_dsym_path
-        Actions.lane_context[SharedValues::DSYM_OUTPUT_PATH] ||
-          Actions.lane_context[SharedValues::DSYM_PATHS] ||
-          Dir["./**/*.dSYM.zip"] + Dir["./**/*.dSYM"]
+        path = Dir["./**/*.dSYM.zip"] + Dir["./**/*.dSYM"]
+        dsym_paths = Actions.lane_context[SharedValues::DSYM_PATHS] if defined? SharedValues::DSYM_PATHS
+        dsyms_output_path = Actions.lane_context[SharedValues::DSYM_OUTPUT_PATH] if defined? SharedValues::DSYM_OUTPUT_PATH
+        dsyms_output_path || dsym_paths || path
       end
     end
   end

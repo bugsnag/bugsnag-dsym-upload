@@ -1,3 +1,10 @@
+## TBD
+
+### Enhancements
+
+* Support sending API key when uploading dSYMs via the script and fastlane plugin
+  [#26](https://github.com/bugsnag/bugsnag-dsym-upload/pull/26)
+
 ## 1.3.4 (2018-07-17)
 
 ### Bug fixes

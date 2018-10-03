@@ -6,8 +6,10 @@
 
 =head1 SYNOPSIS
 
-    bugsnag-dsym-upload [--verbose] [--upload-server URL]
-                                    [--symbol-maps MAP_DIR] dSYMS_PATH
+    bugsnag-dsym-upload [--verbose] [--api-key API_KEY]
+                                    [--upload-server URL]
+                                    [--symbol-maps MAP_DIR] 
+                                    [--project-root DIR] dSYMS_PATH
     bugsnag-dsym-upload --help
 
 =head1 DESCRIPTION
@@ -53,6 +55,11 @@ Optional, only required when uploading a ZIP archive.
 
 Display the help documentation for this command
 
+=item --api-key API_KEY
+
+The API key associated with the project. Informs Bugsnag which project this dSYM should
+be applied to.
+
 =item --symbol-maps MAP_DIR
 
 Path to a directory of bitcode symbol maps. When specified, the dSYM DWARF data
@@ -62,6 +69,10 @@ will be updated with symbols prior to upload. Requires dsymutil.
 
 The server receiving dSYM files. Set this value if using an on-premise Bugsnag
 installation. Defaults to I<https://upload.bugsnag.com>
+
+=item --project-root DIR
+
+The root directory of the project. This will help to group error reports by project
 
 =item I<-s>, --silent
 
