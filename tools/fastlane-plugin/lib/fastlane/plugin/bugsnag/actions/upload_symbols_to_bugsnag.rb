@@ -158,7 +158,8 @@ module Fastlane
         path = Dir["./**/*.dSYM.zip"] + Dir["./**/*.dSYM"]
         dsym_paths = Actions.lane_context[SharedValues::DSYM_PATHS] if defined? SharedValues::DSYM_PATHS
         dsyms_output_path = Actions.lane_context[SharedValues::DSYM_OUTPUT_PATH] if defined? SharedValues::DSYM_OUTPUT_PATH
-        dsyms_output_path || dsym_paths || path
+        default_value = dsyms_output_path || dsym_paths || path
+        parse_dsym_paths(default_value)
       end
     end
   end
