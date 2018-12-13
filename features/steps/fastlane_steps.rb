@@ -5,6 +5,10 @@ Given "fastlane is installed" do
   end
 end
 
+When("I run lane {string} with api_key set to {string}") do |lane, api_key|
+  fastlane_upload_symbols(lane, nil, api_key)
+end
+
 When("I run lane {string} with dsym_path set to {string}") do |lane, dsym_path|
   fastlane_upload_symbols(lane, dsym_path)
 end

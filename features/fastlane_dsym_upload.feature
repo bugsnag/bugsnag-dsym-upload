@@ -53,3 +53,16 @@ Feature: Uploading dSYMs to Bugsnag using Fastlane
         And the part "apiKey" for request 0 equals "1234567890ABCDEF1234567890ABCDEF"
         And the part "dsym" for request 1 is not null
         And the part "apiKey" for request 1 equals "1234567890ABCDEF1234567890ABCDEF"
+
+    Scenario: Uploading dSYMs using shared values from other plugins
+        When I run lane "upload_symbols_with_custom_action" with api_key set to "1234567890ABCDEF1234567890ABCDEF"
+        Then I should receive 4 request
+        And the part "dsym" for request 0 is not null
+        And the part "apiKey" for request 0 equals "1234567890ABCDEF1234567890ABCDEF"
+        And the part "dsym" for request 1 is not null
+        And the part "apiKey" for request 1 equals "1234567890ABCDEF1234567890ABCDEF"
+        And the part "dsym" for request 2 is not null
+        And the part "apiKey" for request 2 equals "1234567890ABCDEF1234567890ABCDEF"
+        And the part "dsym" for request 3 is not null
+        And the part "apiKey" for request 3 equals "1234567890ABCDEF1234567890ABCDEF"
+

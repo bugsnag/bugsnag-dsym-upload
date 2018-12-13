@@ -1,3 +1,10 @@
+## TBD
+
+### Bug fixes
+
+* Fix loading dSYM paths from lane variables like `DSYM_OUTPUT_PATH`
+  [#27](https://github.com/bugsnag/bugsnag-dsym-upload/pull/27)
+
 ## 1.4.0 (2018-10-03)
 
 ### Enhancements

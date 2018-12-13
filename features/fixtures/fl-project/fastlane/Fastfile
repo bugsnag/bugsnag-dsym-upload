@@ -20,6 +20,11 @@ platform :ios do
   lane :upload_symbols_with_api_key do
     upload_symbols_to_bugsnag(upload_url: endpoint, api_key: api_key)
   end
+
+  lane :upload_symbols_with_custom_action do
+    dsym_magic # Sets a custom value to DSYM_OUTPUT_PATH
+    upload_symbols_to_bugsnag(upload_url: endpoint, api_key: api_key)
+  end
 end
 
 
