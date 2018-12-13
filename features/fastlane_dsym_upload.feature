@@ -20,6 +20,12 @@ Feature: Uploading dSYMs to Bugsnag using Fastlane
         And the part "dsym" for request 0 is not null
         And the part "dsym" for request 1 is not null
 
+    Scenario: Uploading dSYMs with a zip filename containing spaces and special characters
+        When I run lane "upload_symbols" with dsym_path set to "some dir/some files β.app.dSYM.zip"
+        Then I should receive 2 requests
+        And the part "dsym" for request 0 is not null
+        And the part "dsym" for request 1 is not null
+
     Scenario: Uploading dSYMs using API key and config file together uses api key from config file
         When I run lane "upload_symbols" with dsym_path set to "dsyms.zip", api_key set to "1234567890abcde" and config_file set to "TestList.plist"
         Then I should receive 2 requests
@@ -59,3 +65,4 @@ Feature: Uploading dSYMs to Bugsnag using Fastlane
         And the part "apiKey" for request 2 equals "1234567890ABCDEF1234567890ABCDEF"
         And the part "dsym" for request 3 is not null
         And the part "apiKey" for request 3 equals "1234567890ABCDEF1234567890ABCDEF"
+
