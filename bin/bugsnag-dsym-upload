@@ -141,7 +141,7 @@ for dsym in $dsym_dir/*.dSYM; do
             # Attach the api key and project root parameters if they have been provided
             args=""
             if [[ ! -z $project_root ]]; then
-                args="-F projectRoot=$project_root "
+                args="-F projectRoot=\"$project_root\" "
             fi
 
             if [[ ! -z $api_key ]]; then
