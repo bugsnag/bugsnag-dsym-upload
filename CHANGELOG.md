@@ -1,3 +1,10 @@
+## 1.4.2 (TBD)
+
+### Bug fixes
+
+* Ensure curl uses HTTP version 1.1 as a workaround for [#33](https://github.com/bugsnag/bugsnag-dsym-upload/issues/33)
+  [#36](https://github.com/bugsnag/bugsnag-dsym-upload/pull/36)
+
 ## 1.4.1 (2018-12-17)
 
 ### Bug fixes

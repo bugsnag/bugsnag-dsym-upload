@@ -1,4 +1,4 @@
 source 'https://rubygems.org'
 
 gem 'bugsnag-maze-runner', :git => 'https://github.com/bugsnag/maze-runner',
-                           :tag => 'v1.0.0'
+                           :tag => 'v1.1.0'
