@@ -75,7 +75,7 @@ module Fastlane
           return if key.nil?
 
           unless !key[/\H/] and key.length == 32
-            UI.user_error!("API key should be a 32 character hexdeciaml string")
+            UI.user_error!("API key should be a 32 character hexadecimal string")
           end
         end
 
