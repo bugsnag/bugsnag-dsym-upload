@@ -6,8 +6,8 @@ require 'fastlane/plugin/bugsnag/version'
 Gem::Specification.new do |spec|
   spec.name          = 'fastlane-plugin-bugsnag'
   spec.version       = Fastlane::Bugsnag::VERSION
-  spec.author        = %q{Delisa Mason}
-  spec.email         = %q{iskanamagus@gmail.com}
+  spec.author        = %q{Bugsnag}
+  spec.email         = %q{support@bugsnag.com}
 
   spec.summary       = %q{Uploads dSYM files to Bugsnag}
   spec.homepage      = "https://github.com/bugsnag/bugsnag-upload"
@@ -17,13 +17,13 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
   spec.test_files    = Dir["spec/**/*"]
 
-  spec.add_runtime_dependency 'xml-simple'
-  spec.add_runtime_dependency 'git'
+  spec.add_runtime_dependency 'xml-simple', '~> 1'
+  spec.add_runtime_dependency 'git', '~> 1'
 
-  spec.add_development_dependency 'pry'
-  spec.add_development_dependency 'bundler'
-  spec.add_development_dependency 'rspec'
-  spec.add_development_dependency 'rake'
-  spec.add_development_dependency 'rubocop'
-  spec.add_development_dependency 'fastlane', '>= 2.28.5'
+  spec.add_development_dependency 'pry', '~> 0'
+  spec.add_development_dependency 'bundler', '~> 2'
+  spec.add_development_dependency 'rspec', '~> 3'
+  spec.add_development_dependency 'rake', '~> 13'
+  spec.add_development_dependency 'rubocop', '~> 0'
+  spec.add_development_dependency 'fastlane', '>= 2.28.5', '< 3.0'
 end
