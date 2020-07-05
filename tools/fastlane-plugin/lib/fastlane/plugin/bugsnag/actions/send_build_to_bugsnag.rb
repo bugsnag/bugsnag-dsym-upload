@@ -60,9 +60,9 @@ module Fastlane
           end
         else
           if params[:config_file]
-            message << "Set BugsnagAPIKey in your Info.plist file to detect API key automatically."
+            message << "Set bugsnag.apiKey in your Info.plist file to detect API key automatically."
           else
-            message << "Set the config_file option with the path to your Info.plist and set BugsnagAPIKey in it to detect API key automatically."
+            message << "Set the config_file option with the path to your Info.plist and set bugsnag.apiKey in it to detect API key automatically."
           end
         end
         message
@@ -215,8 +215,13 @@ module Fastlane
 
       def self.options_from_info_plist file_path
         plist_getter = Fastlane::Actions::GetInfoPlistValueAction
+        bugsnag_dict = plist_getter.run(path: file_path, key: "bugsnag")
+        api_key = bugsnag_dict["apiKey"] unless bugsnag_dict.nil?
+        if api_key.nil?
+          api_key = plist_getter.run(path: file_path, key: "BugsnagAPIKey") 
+        end
         {
-          apiKey: plist_getter.run(path: file_path, key: "BugsnagAPIKey"),
+          apiKey: api_key,
           appVersion: plist_getter.run(path: file_path, key: "CFBundleShortVersionString"),
           appBundleVersion: plist_getter.run(path: file_path, key: "CFBundleVersion"),
           config_file: file_path,

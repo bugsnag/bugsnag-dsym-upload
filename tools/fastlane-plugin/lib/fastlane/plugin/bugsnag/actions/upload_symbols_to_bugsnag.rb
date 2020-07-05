@@ -131,8 +131,13 @@ module Fastlane
 
       def self.options_from_info_plist file_path
         plist_getter = Fastlane::Actions::GetInfoPlistValueAction
+        bugsnag_dict = plist_getter.run(path: file_path, key: "bugsnag")
+        api_key = bugsnag_dict["apiKey"] unless bugsnag_dict.nil?
+        if api_key.nil?
+          api_key = plist_getter.run(path: file_path, key: "BugsnagAPIKey") 
+        end
         {
-          apiKey: plist_getter.run(path: file_path, key: "BugsnagAPIKey"),
+          apiKey: api_key,
           config_file: file_path,
         }
       end

@@ -145,6 +145,18 @@ describe Action do
         Action.run(load_default_opts.merge({dsym_path: FIXTURE_PATH, project_root: root_path}))
       end
     end
+
+    it 'uses legacy API key argument from plist' do
+      root_path = "/test/test/test"
+      expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
+                                              "--silent",
+                                              "--api-key", "legacy-key",
+                                              "--project-root", root_path,
+                                              FIXTURE_PATH).and_return(true)
+      Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj_legacy')) do
+        Action.run(load_default_opts.merge({dsym_path: FIXTURE_PATH, project_root: root_path}))
+      end
+    end
     
     it 'allows config file to overwrite parameter' do
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,

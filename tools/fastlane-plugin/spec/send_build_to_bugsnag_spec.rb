@@ -25,6 +25,17 @@ describe BuildAction do
       end
     end
 
+    it 'reads api key from legacy location' do
+      expect(BuildAction).to receive(:send_notification) do |url, body|
+        payload = ::JSON.load(body)
+        expect(payload['apiKey']).to eq 'legacy-key'
+      end
+
+      Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj_legacy')) do
+        BuildAction.run(load_default_opts)
+      end
+    end
+
     context 'using default config_file option' do
       context 'override API key option' do
         it 'reads API key from the api_key option' do
