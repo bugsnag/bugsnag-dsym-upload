@@ -112,7 +112,7 @@ module Fastlane
                                        default_value: Dir::pwd,
                                        optional: true),
           FastlaneCore::ConfigItem.new(key: :config_file,
-                                       env_name: "BUGSNAG_INFO_PLIST",
+                                       env_name: "BUGSNAG_CONFIG_FILE",
                                        description: "Info.plist location",
                                        optional: true,
                                        default_value: default_info_plist_path),
