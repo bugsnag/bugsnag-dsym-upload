@@ -3,10 +3,8 @@ require 'spec_helper'
 Action = Fastlane::Actions::UploadSymbolsToBugsnagAction
 
 describe Action do
-  def load_default_opts
-    Action.available_options.map do |x|
-      [x.key, x.default_value]
-    end.to_h
+  def run_with args
+    Action.run(Fastlane::ConfigurationHelper.parse(Action, args))
   end
 
   context "the packaged gem" do
@@ -30,7 +28,7 @@ describe Action do
                                               "--silent", 
                                               "--project-root", Dir::pwd,
                                               FIXTURE_PATH).and_return(true)
-      Action.run(load_default_opts.merge({dsym_path: FIXTURE_PATH}))
+      run_with({dsym_path: FIXTURE_PATH})
     end
 
     it 'prints verbose if verbose flag set' do
@@ -38,40 +36,40 @@ describe Action do
                                               "--verbose", 
                                               "--project-root", Dir::pwd,
                                               FIXTURE_PATH).and_return(true)
-      Action.run(load_default_opts.merge({dsym_path: FIXTURE_PATH, verbose: true}))
+      run_with({dsym_path: FIXTURE_PATH, verbose: true})
     end
 
     it 'UI.user_error when script fails' do
       expect(Fastlane::UI).to receive(:user_error!).with("Failed uploading #{FIXTURE_PATH}")
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
         "--silent", "--project-root", Dir::pwd, FIXTURE_PATH).and_return(false)
-      Action.run(load_default_opts.merge({dsym_path: FIXTURE_PATH}))
+      run_with({dsym_path: FIXTURE_PATH})
     end
 
     it 'requires the dSYM file path to exist' do
       expect(Fastlane::UI).to receive(:user_error!)
 
-      Action.run(load_default_opts.merge({dsym_path: 'fake/file/path'}))
+      run_with({dsym_path: 'fake/file/path'})
     end
 
     it 'rejects dSYM files which are not a .zip or a directory' do
       expect(Fastlane::UI).to receive(:user_error!)
 
-      Action.run(load_default_opts.merge({dsym_path: File.join(FIXTURE_PATH, 'invalid_file')}))
+      run_with({dsym_path: File.join(FIXTURE_PATH, 'invalid_file')})
     end
 
     it 'uploads a single .dSYM file' do
       directory = File.join(FIXTURE_PATH, 'dSYMs')
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
                                               "--silent", "--project-root", Dir::pwd, directory).and_return(true)
-      Action.run(load_default_opts.merge({dsym_path: File.join(FIXTURE_PATH, 'dSYMs/app.dSYM')}))
+      run_with({dsym_path: File.join(FIXTURE_PATH, 'dSYMs/app.dSYM')})
     end
 
     it 'uploads a .zip of .dSYM files' do
       path = File.join(FIXTURE_PATH, 'files.zip')
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
                                               "--silent", "--project-root", Dir::pwd, path).and_return(true)
-      Action.run(load_default_opts.merge({dsym_path: path}))
+      run_with({dsym_path: path})
     end
 
     it 'uploads multiple .zip files' do
@@ -81,7 +79,7 @@ describe Action do
                                               "--silent", "--project-root", Dir::pwd, zip1).and_return(true)
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
                                               "--silent", "--project-root", Dir::pwd, zip2).and_return(true)
-      Action.run(load_default_opts.merge({dsym_path: [zip1, zip2]}))
+      run_with({dsym_path: [zip1, zip2]})
     end
 
     it 'uploads multiple .dSYM files multiple directories' do
@@ -94,7 +92,7 @@ describe Action do
                                               "--silent", "--project-root", Dir::pwd, directories[0]).and_return(true)
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
                                               "--silent", "--project-root", Dir::pwd, directories[1]).and_return(true)
-      Action.run(load_default_opts.merge({dsym_path: [dsym1, dsym2, dsym3, dsym4]}))
+      run_with({dsym_path: [dsym1, dsym2, dsym3, dsym4]})
     end
 
     it 'uploads multiple .dSYM files in a single directory' do
@@ -103,7 +101,7 @@ describe Action do
       directory = File.join(FIXTURE_PATH, 'dSYMs')
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
                                               "--silent", "--project-root", Dir::pwd, directory).and_return(true)
-      Action.run(load_default_opts.merge({dsym_path: [dsym1, dsym2]}))
+      run_with({dsym_path: [dsym1, dsym2]})
     end
 
     it 'accepts a project root argument' do
@@ -112,48 +110,50 @@ describe Action do
                                               "--silent",
                                               "--project-root", root_path,
                                               FIXTURE_PATH).and_return(true)
-      Action.run(load_default_opts.merge({dsym_path: FIXTURE_PATH, project_root: root_path}))
+      run_with({dsym_path: FIXTURE_PATH, project_root: root_path})
     end
 
     it 'accepts an API key argument' do
-      api_key = "1234567890ABCDE"
+      api_key = "123456789123456789001234567890FF"
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
                                               "--silent",
                                               "--api-key", api_key,
                                               "--project-root", Dir::pwd,
                                               FIXTURE_PATH).and_return(true)
-      Action.run(load_default_opts.merge({dsym_path: FIXTURE_PATH, api_key: api_key}))
+      run_with({dsym_path: FIXTURE_PATH, api_key: api_key})
     end
 
     it 'accepts an API key argument with no project root' do
-      api_key = "1234567890ABCDE"
+      api_key = "123456789012345678901234567890FF"
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
                                               "--silent",
                                               "--api-key", api_key,
+                                              "--project-root", `pwd`.chomp,
                                               FIXTURE_PATH).and_return(true)
-      Action.run(load_default_opts.merge({dsym_path: FIXTURE_PATH, api_key: api_key, project_root: nil}))
+      run_with({dsym_path: FIXTURE_PATH, api_key: api_key, project_root: nil})
     end
 
     it 'uses default API key argument from plist' do
       root_path = "/test/test/test"
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
                                               "--silent",
-                                              "--api-key", "other-key",
+                                              "--api-key", "3443f00f3443f00f3443f00f3443f00f",
                                               "--project-root", root_path,
                                               FIXTURE_PATH).and_return(true)
       Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
-        Action.run(load_default_opts.merge({dsym_path: FIXTURE_PATH, project_root: root_path}))
+        run_with({dsym_path: FIXTURE_PATH, project_root: root_path})
       end
     end
     
     it 'allows config file to overwrite parameter' do
+      api_key = "123456789123456789001234567890FF"
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
                                               "--silent",
-                                              "--api-key", "project-key",
+                                              "--api-key", "faaffaaffaaffaaffaaffaaffaaffaaf",
                                               "--project-root", File.join(FIXTURE_PATH, 'ios_proj'),
                                               FIXTURE_PATH).and_return(true)
       Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
-        Action.run(load_default_opts.merge({dsym_path: FIXTURE_PATH, api_key: "ignored:", config_file: File.join('Project', 'Info.plist')}))
+        run_with({dsym_path: FIXTURE_PATH, api_key: api_key, config_file: File.join('Project', 'Info.plist')})
       end
     end
 
@@ -164,7 +164,7 @@ describe Action do
                                                 "--upload-server", "http://myserver.example.com",
                                                 "--project-root", Dir::pwd,
                                                 FIXTURE_PATH).and_return(true)
-        Action.run(load_default_opts.merge({dsym_path: FIXTURE_PATH, upload_url: "http://myserver.example.com"}))
+        run_with({dsym_path: FIXTURE_PATH, upload_url: "http://myserver.example.com"})
       end
     end
 
@@ -176,7 +176,7 @@ describe Action do
                                                 "--symbol-maps", path,
                                                 "--project-root", Dir::pwd,
                                                 FIXTURE_PATH).and_return(true)
-        Action.run(load_default_opts.merge({dsym_path: FIXTURE_PATH, symbol_maps_path: path}))
+        run_with({dsym_path: FIXTURE_PATH, symbol_maps_path: path})
       end
     end
   end

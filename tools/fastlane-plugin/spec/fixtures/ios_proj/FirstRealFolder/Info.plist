@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>BugsnagAPIKey</key>
-    <string>other-key</string>
+    <string>3443f00f3443f00f3443f00f3443f00f</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
