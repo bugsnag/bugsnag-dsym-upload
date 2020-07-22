@@ -150,7 +150,7 @@ for dsym in $dsym_dir/*.dSYM; do
 
             # We need to shell out to perform the curl as there seems to be some indirect
             # wrapping of this script which causes the command to fail if called directly.
-            curl_cmd="curl --silent --show-error --http1.1 $upload_server -F dsym=@\"$file\" $args"
+            curl_cmd="curl --fail --silent --show-error --http1.1 $upload_server -F dsym=@\"$file\" $args"
             output=$(sh -c "$curl_cmd")
 
             if [ $? -eq 0 ] && [ "$output" != "invalid apiKey" ]; then
