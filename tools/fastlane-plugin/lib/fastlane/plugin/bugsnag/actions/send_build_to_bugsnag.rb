@@ -9,32 +9,31 @@ module Fastlane
 
       def self.run(params)
         payload = {buildTool: BUILD_TOOL, sourceControl: {}}
-        if lane_context[:PLATFORM_NAME] == :android
-          payload.merge!(options_from_android_manifest(params[:config_file])) if params[:config_file]
+
+        # If a configuration file was found or was specified, load in the options:
+        if params[:config_file]
+          UI.message("Loading build information from #{params[:config_file]}")
+          config_options = load_config_file_options(params[:config_file])
+
+          # for each of the config options, if it's not been overriden by any?
+          # input to the lane, write it to the payload:
+          params[:api_key].nil? ? payload[:apiKey] = config_options[:apiKey] : payload[:apiKey] = params[:api_key]
+          params[:app_version].nil? ? payload[:appVersion] = config_options[:appVersion] : payload[:appVersion] = params[:app_version]
+          params[:android_version_code].nil? ? payload[:appVersionCode] = config_options[:appVersionCode] : payload[:appVersionCode] = params[:android_version_code]
+          params[:ios_bundle_version].nil? ? payload[:appBundleVersion] = config_options[:appBundleVersion] : payload[:appBundleVersion] = params[:ios_bundle_version]
+          params[:release_stage].nil? ? payload[:releaseStage] = "production" : payload[:releaseStage] = params[:release_stage]
         else
-          payload.merge!(options_from_info_plist(params[:config_file])) if params[:config_file]
+          # No configuration file was found or specified, use the input parameters:
+          payload[:apiKey] = params[:api_key]
+          payload[:appVersion] = params[:app_version]
+          payload[:appVersionCode] = params[:android_version_code]
+          payload[:appBundleVersion] = params[:ios_bundle_version]
+          params[:release_stage].nil? ? payload[:releaseStage] = "production" : params[:release_stage] = params[:release_stage]
         end
 
-        default_plist = default_info_plist_path
-        default_manifest = default_android_manifest_path
-        if (lane_context[:PLATFORM_NAME] == :android and params[:config_file] == default_manifest) or
-           (lane_context[:PLATFORM_NAME] != :android and params[:config_file] == default_plist)
-          # Load custom API key and version properties only if config file has not been overridden
-          payload[:apiKey] = params[:api_key] unless params[:api_key].nil?
-          payload[:appVersion] = params[:app_version] unless params[:app_version].nil?
-          payload[:appVersionCode] = params[:android_version_code] unless params[:android_version_code].nil?
-          payload[:appBundleVersion] = params[:ios_bundle_version] unless params[:ios_bundle_version].nil?
-        else
-          # Print which file is populating version and API key information since the value has been
-          # overridden
-          UI.message("Loading API key and app version info from #{params[:config_file]}")
-        end
-        payload.delete(:config_file)
-
-        # Overwrite automated options with configured if set
-        payload[:releaseStage] = params[:release_stage] unless params[:release_stage].nil?
-        payload[:builderName] = params[:builder]
-
+        # If builder, or source control information has been provided into
+        # Fastlane, apply it to the payload here.
+        payload[:builderName] = params[:builder] if params[:builder]
         payload[:sourceControl][:revision] = params[:revision] if params[:revision]
         payload[:sourceControl][:repository] = params[:repository] if params[:repository]
         payload[:sourceControl][:provider] = params[:provider] if params[:provider]
@@ -47,6 +46,12 @@ module Fastlane
         if payload[:appVersion].nil?
           UI.user_error! missing_app_version_message(params)
         end
+
+        UI.message("Sending build to Bugsnag with payload:")
+        payload.each do |param|
+          UI.message("  #{param[0].to_s.rjust(18)}: #{param[1]}")
+        end
+
         send_notification(params[:endpoint], ::JSON.dump(payload))
       end
 
@@ -69,7 +74,7 @@ module Fastlane
       end
 
       def self.missing_app_version_message(params)
-        message = "An app version must be specified release a build."
+        message = "An app version must be specified release a build. "
         if lane_context[:PLATFORM_NAME] == :android
           if params[:config_file]
             message << "Set com.bugsnag.android.APP_VERSION in your AndroidManifest.xml to detect this value automatically."
@@ -115,32 +120,27 @@ module Fastlane
       end
 
       def self.available_options
-        options = load_default_values
+        git_options = load_git_remote_options
         [
           FastlaneCore::ConfigItem.new(key: :config_file,
                                        description: "AndroidManifest.xml/Info.plist location",
                                        optional: true,
-                                       default_value: options[:config_file]),
+                                       default_value: default_config_file),
           FastlaneCore::ConfigItem.new(key: :api_key,
                                        description: "Bugsnag API Key",
-                                       optional: true,
-                                       default_value: options[:apiKey]),
+                                       optional: true),
           FastlaneCore::ConfigItem.new(key: :app_version,
                                        description: "App version being built",
-                                       optional: true,
-                                       default_value: options[:appVersion]),
+                                       optional: true),
           FastlaneCore::ConfigItem.new(key: :android_version_code,
                                        description: "Android app version code",
-                                       optional: true,
-                                       default_value: options[:appVersionCode]),
+                                       optional: true),
           FastlaneCore::ConfigItem.new(key: :ios_bundle_version,
                                        description: "iOS/macOS/tvOS bundle version",
-                                       optional: true,
-                                       default_value: options[:appBundleVersion]),
+                                       optional: true),
           FastlaneCore::ConfigItem.new(key: :release_stage,
                                        description: "Release stage being built, i.e. staging, production",
-                                       optional: true,
-                                       default_value: options[:releaseStage] || "production"),
+                                       optional: true),
           FastlaneCore::ConfigItem.new(key: :builder,
                                        description: "The name of the entity triggering the build",
                                        optional: true,
@@ -148,19 +148,19 @@ module Fastlane
           FastlaneCore::ConfigItem.new(key: :repository,
                                        description: "The source control repository URL for this application",
                                        optional: true,
-                                       default_value: options[:repository]),
+                                       default_value: git_options[:repository]),
           FastlaneCore::ConfigItem.new(key: :revision,
                                        description: "The source control revision id",
                                        optional: true,
-                                       default_value: options[:revision]),
+                                       default_value: git_options[:revision]),
           FastlaneCore::ConfigItem.new(key: :provider,
                                        description: "The source control provider, one of 'github-enterprise', 'gitlab-onpremise', or 'bitbucket-server', if any",
                                        optional: true,
                                        default_value: nil,
                                        verify_block: proc do |value|
-                                         valid = ['github-enterprise', 'gitlab-onpremise', 'bitbucket-server'].include? value
+                                         valid = ['github', 'github-enterprise', 'gitlab', 'gitlab-onpremise', 'bitbucket', 'bitbucket-server'].include? value
                                          unless valid
-                                           UI.user_error!("Provider must be one of 'github-enterprise', 'gitlab-onpremise', 'bitbucket-server', or unspecified")
+                                           UI.user_error!("Provider must be one of 'github', 'github-enterprise', 'gitlab', 'gitlab-onpremise', 'bitbucket', 'bitbucket-server', or unspecified")
                                          end
                                        end),
           FastlaneCore::ConfigItem.new(key: :endpoint,
@@ -172,77 +172,96 @@ module Fastlane
 
       private
 
-      def self.load_default_values
-        options = {releaseStage: "production", user: `whoami`.chomp}
+      # Get any Git options (remote repo, and revision) from the directory
+      def self.load_git_remote_options
+        git_options = {repository:nil, revision:nil}
+        require "git"
+        begin
+          repo = Git.open(Dir.pwd)
+          origin = repo.remotes.detect {|r| r.name == "origin"}
+          origin = repo.remotes.first unless origin
+          if origin
+            git_options[:repository] = origin.url
+            git_options[:revision] = repo.revparse("HEAD")
+          end
+        rescue
+        end
+        return git_options
+      end
+
+      # Used to get a default configuration file (AndroidManifest.xml or Info.plist)
+      def self.default_config_file
         case lane_context[:PLATFORM_NAME]
         when nil
           if file_path = default_android_manifest_path
-            options.merge!(load_default_android_values(file_path))
+            return file_path
           elsif file_path = default_info_plist_path
-            options.merge!(options_from_info_plist(file_path))
+            return file_path
           end
         when :android
           if file_path = default_android_manifest_path
-            options.merge!(load_default_android_values(file_path))
+            return file_path
           end
         else
           if file_path = default_info_plist_path
-            options.merge!(options_from_info_plist(file_path))
+            return file_path
           end
         end
+      end
 
-        if git_opts = git_remote_options
-          options.merge!(git_opts)
+      def self.load_config_file_options config_file
+        options = {}
+        case File.extname(config_file)
+        when ".xml"
+          options = load_options_from_xml(config_file)
+          return options
+        when ".plist"
+          options = load_options_from_plist(config_file)
+          return options
+        else
+          UI.user_error("File type of '#{config_file}' was not recognised. This should be .xml for Android and .plist for Cococa")
         end
-        options
-      end
-
-      def self.load_default_android_values file_path
-        options = options_from_android_manifest(file_path)
-        build_gradle_path = Dir.glob("{android/,}app/build.gradle").first
-        build_gradle_path ||= Dir.glob("build.gradle").first
-        options.merge!(options_from_build_gradle(build_gradle_path)) if build_gradle_path
-        options
-      end
-
-      def self.default_android_manifest_path
-        Dir.glob("./{android/,}{app,}/src/main/AndroidManifest.xml").first
       end
 
       def self.default_info_plist_path
         Dir.glob("./{ios/,}*/Info.plist").reject {|path| path =~ /build|test/i }.first
       end
-
-      def self.options_from_info_plist file_path
+      def self.load_options_from_plist file_path
+        options = {}
         plist_getter = Fastlane::Actions::GetInfoPlistValueAction
         bugsnag_dict = plist_getter.run(path: file_path, key: "bugsnag")
         api_key = bugsnag_dict["apiKey"] unless bugsnag_dict.nil?
         if api_key.nil?
-          api_key = plist_getter.run(path: file_path, key: "BugsnagAPIKey") 
+          api_key = plist_getter.run(path: file_path, key: "BugsnagAPIKey")
         end
-        {
-          apiKey: api_key,
-          appVersion: plist_getter.run(path: file_path, key: "CFBundleShortVersionString"),
-          appBundleVersion: plist_getter.run(path: file_path, key: "CFBundleVersion"),
-          config_file: file_path,
-        }
+        options[:apiKey] = api_key
+        options[:appVersion] = plist_getter.run(path: file_path, key: "CFBundleShortVersionString")
+        options[:appBundleVersion] = plist_getter.run(path: file_path, key: "CFBundleVersion")
+        return options
       end
 
+      def self.default_android_manifest_path
+        Dir.glob("./{android/,}{app,}/src/main/AndroidManifest.xml").first
+      end
+      def self.load_options_from_xml file_path
+        options = options_from_android_manifest(file_path)
+        build_gradle_path = Dir.glob("{android/,}app/build.gradle").first
+        build_gradle_path ||= Dir.glob("build.gradle").first
+        options.merge!(options_from_build_gradle(build_gradle_path)) if build_gradle_path
+        return options
+      end
       def self.options_from_android_manifest file_path
         options = {}
         begin
           meta_data = parse_android_manifest_options(XmlSimple.xml_in(file_path))
-
           options[:apiKey] = meta_data["com.bugsnag.android.API_KEY"]
           options[:appVersion] = meta_data["com.bugsnag.android.APP_VERSION"]
           options[:releaseStage] = meta_data["com.bugsnag.android.RELEASE_STAGE"]
         rescue ArgumentError
           nil
         end
-        options[:config_file] = file_path
         options
       end
-
       def self.options_from_build_gradle file_path
         options = {}
         begin
@@ -257,24 +276,6 @@ module Fastlane
         end
         options
       end
-
-      def self.git_remote_options
-        require "git"
-        begin
-          repo = Git.open(Dir.pwd)
-          origin = repo.remotes.detect {|r| r.name == "origin"}
-          origin = repo.remotes.first unless origin
-          if origin
-            return {
-              repository: origin.url,
-              revision: repo.revparse("HEAD"),
-            }
-          end
-        rescue
-        end
-        nil
-      end
-
       def self.parse_android_manifest_options config_hash
         map_meta_data(get_meta_data(config_hash))
       end

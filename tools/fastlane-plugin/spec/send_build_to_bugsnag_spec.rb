@@ -39,31 +39,31 @@ describe BuildAction do
     end
 
     context 'using default config_file option' do
-      context 'override API key option' do
+      context 'override API key from config' do
         it 'reads API key from the api_key option' do
           expect(BuildAction).to receive(:send_notification) do |url, body|
             payload = ::JSON.load(body)
-            expect(payload['apiKey']).to eq 'baobab'
+            expect(payload['apiKey']).to eq '12345678901234567890123456789FFF'
           end
 
           Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
             run_with({
-              api_key: 'baobab'
+              api_key: '12345678901234567890123456789FFF'
             })
           end
         end
 
-        it 'reads version info from the config file' do
+        it 'uses input versions from options' do
           expect(BuildAction).to receive(:send_notification) do |url, body|
             payload = ::JSON.load(body)
-            expect(payload['appVersion']).to eq '4.0.0'
-            expect(payload['appBundleVersion']).to eq '400'
+            expect(payload['appVersion']).to eq '8.0.0'
+            expect(payload['appBundleVersion']).to eq '800'
           end
 
           Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
             run_with({
-              app_version: '4.0.0',
-              ios_bundle_version: '400'
+              app_version: '8.0.0',
+              ios_bundle_version: '800'
             })
           end
         end
@@ -86,36 +86,36 @@ describe BuildAction do
         end
       end
 
-      context 'override API key option' do
-        it 'reads API key from the config file' do
+      context 'override API key, and config file' do
+        it 'uses the input api_key to override a non default config' do
           expect(BuildAction).to receive(:send_notification) do |url, body|
             payload = ::JSON.load(body)
             expect(payload['appVersion']).to eq '3.0-project'
             expect(payload['appBundleVersion']).to eq '33'
-            expect(payload['apiKey']).to eq '12345678901234567890123456789DDD'
+            expect(payload['apiKey']).to eq '12345678901234567890123456789EEE'
           end
 
           Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
             run_with({
               config_file: File.join('Project', 'Info.plist'),
-              api_key: 'baobab'
+              api_key: '12345678901234567890123456789EEE'
             })
           end
         end
 
-        it 'reads version info from the config file' do
+        it 'uses the input versions to override a non default config' do
           expect(BuildAction).to receive(:send_notification) do |url, body|
             payload = ::JSON.load(body)
-            expect(payload['appVersion']).to eq '3.0-project'
-            expect(payload['appBundleVersion']).to eq '33'
+            expect(payload['appVersion']).to eq '9.0.0'
+            expect(payload['appBundleVersion']).to eq '900'
             expect(payload['apiKey']).to eq '12345678901234567890123456789DDD'
           end
 
           Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
             run_with({
               config_file: File.join('Project', 'Info.plist'),
-              app_version: '4.0.0',
-              ios_bundle_version: '400'
+              app_version: '9.0.0',
+              ios_bundle_version: '900'
             })
           end
         end
