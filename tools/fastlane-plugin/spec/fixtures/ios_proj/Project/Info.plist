@@ -5,7 +5,7 @@
 	<key>bugsnag</key>
 	<dict>
 		<key>apiKey</key>
-		<string>project-key</string>
+		<string>12345678901234567890123456789DDD</string>
 	</dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
@@ -20,9 +20,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.0-project</string>
+	<string>3.0-project</string>
 	<key>CFBundleVersion</key>
-	<string>6</string>
+	<string>33</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -48,4 +48,3 @@
 	</array>
 </dict>
 </plist>
-

@@ -13,9 +13,9 @@ describe BuildAction do
     it 'detects default Info.plist file excluding test dirs' do
       expect(BuildAction).to receive(:send_notification) do |url, body|
         payload = ::JSON.load(body)
-        expect(payload['appVersion']).to eq '3.0-other'
-        expect(payload['appBundleVersion']).to eq '56'
-        expect(payload['apiKey']).to eq '3443f00f3443f00f3443f00f3443f00f'
+        expect(payload['appVersion']).to eq '2.0-other'
+        expect(payload['appBundleVersion']).to eq '22'
+        expect(payload['apiKey']).to eq '12345678901234567890123456789AAA'
       end
 
       Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
@@ -24,13 +24,17 @@ describe BuildAction do
     end
 
     it 'reads api key from legacy location' do
+      # the API key is now in `bugsnag.apiKey`, it used to be in 'BugsnagAPIKey',
+      # test this can be extracted correctly from the `ios_proj_legacy`
       expect(BuildAction).to receive(:send_notification) do |url, body|
         payload = ::JSON.load(body)
-        expect(payload['apiKey']).to eq 'legacy-key'
+        expect(payload['appVersion']).to eq '4.0-project'
+        expect(payload['appBundleVersion']).to eq '44'
+        expect(payload['apiKey']).to eq '12345678901234567890123456789BBB'
       end
 
       Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj_legacy')) do
-        BuildAction.run(load_default_opts)
+        run_with({})
       end
     end
 
@@ -70,9 +74,9 @@ describe BuildAction do
       it 'reads API key and version info from the config file' do
         expect(BuildAction).to receive(:send_notification) do |url, body|
           payload = ::JSON.load(body)
-          expect(payload['appVersion']).to eq '2.0-project'
-          expect(payload['appBundleVersion']).to eq '6'
-          expect(payload['apiKey']).to eq 'faaffaaffaaffaaffaaffaaffaaffaaf'
+          expect(payload['appVersion']).to eq '3.0-project'
+          expect(payload['appBundleVersion']).to eq '33'
+          expect(payload['apiKey']).to eq '12345678901234567890123456789DDD'
         end
 
         Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
@@ -86,7 +90,9 @@ describe BuildAction do
         it 'reads API key from the config file' do
           expect(BuildAction).to receive(:send_notification) do |url, body|
             payload = ::JSON.load(body)
-            expect(payload['apiKey']).to eq 'faaffaaffaaffaaffaaffaaffaaffaaf'
+            expect(payload['appVersion']).to eq '3.0-project'
+            expect(payload['appBundleVersion']).to eq '33'
+            expect(payload['apiKey']).to eq '12345678901234567890123456789DDD'
           end
 
           Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
@@ -100,8 +106,9 @@ describe BuildAction do
         it 'reads version info from the config file' do
           expect(BuildAction).to receive(:send_notification) do |url, body|
             payload = ::JSON.load(body)
-            expect(payload['appVersion']).to eq '2.0-project'
-            expect(payload['appBundleVersion']).to eq '6'
+            expect(payload['appVersion']).to eq '3.0-project'
+            expect(payload['appBundleVersion']).to eq '33'
+            expect(payload['apiKey']).to eq '12345678901234567890123456789DDD'
           end
 
           Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
