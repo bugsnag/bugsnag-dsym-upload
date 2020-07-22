@@ -176,6 +176,7 @@ describe Action do
     it 'reject an invalid API key' do
       api_key = "this-is-not-a-hex-key"
       expect(Fastlane::UI).to receive(:user_error!).with("API key should be a 32 character hexadecimal string")
+      expect(Fastlane::UI).to receive(:user_error!).with("Failed uploading #{FIXTURE_PATH}")
       Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
         run_with({dsym_path: FIXTURE_PATH, api_key: api_key, config_file: File.join('Project', 'Info.plist')})
       end
