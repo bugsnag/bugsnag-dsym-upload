@@ -173,6 +173,14 @@ describe Action do
       end
     end
 
+    it 'reject an invalid API key' do
+      api_key = "this-is-not-a-hex-key"
+      expect(Fastlane::UI).to receive(:user_error!).with("API key should be a 32 character hexadecimal string")
+      Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
+        run_with({dsym_path: FIXTURE_PATH, api_key: api_key, config_file: File.join('Project', 'Info.plist')})
+      end
+    end
+
     context 'using a private server' do
       it 'uploads to the private server' do
         expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
