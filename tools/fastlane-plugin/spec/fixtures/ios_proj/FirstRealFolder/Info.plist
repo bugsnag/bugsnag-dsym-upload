@@ -5,7 +5,7 @@
 	<key>bugsnag</key>
 	<dict>
 		<key>apiKey</key>
-		<string>other-key</string>
+		<string>12345678901234567890123456789AAA</string>
 	</dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
@@ -48,5 +48,3 @@
 	</array>
 </dict>
 </plist>
-
-

@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>BugsnagAPIKey</key>
-    <string>legacy-key</string>
+    <string>12345678901234567890123456789BBB</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -45,4 +45,3 @@
 	</array>
 </dict>
 </plist>
-

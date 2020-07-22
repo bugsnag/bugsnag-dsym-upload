@@ -25,7 +25,7 @@ describe Action do
   describe '#run' do
     it 'silences script output by default' do
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
-                                              "--silent", 
+                                              "--silent",
                                               "--project-root", Dir::pwd,
                                               FIXTURE_PATH).and_return(true)
       run_with({dsym_path: FIXTURE_PATH})
@@ -33,7 +33,7 @@ describe Action do
 
     it 'prints verbose if verbose flag set' do
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
-                                              "--verbose", 
+                                              "--verbose",
                                               "--project-root", Dir::pwd,
                                               FIXTURE_PATH).and_return(true)
       run_with({dsym_path: FIXTURE_PATH, verbose: true})
@@ -42,19 +42,19 @@ describe Action do
     it 'UI.user_error when script fails' do
       expect(Fastlane::UI).to receive(:user_error!).with("Failed uploading #{FIXTURE_PATH}")
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
-        "--silent", "--project-root", Dir::pwd, FIXTURE_PATH).and_return(false)
+                                              "--silent",
+                                              "--project-root", Dir::pwd,
+                                              FIXTURE_PATH).and_return(false)
       run_with({dsym_path: FIXTURE_PATH})
     end
 
     it 'requires the dSYM file path to exist' do
-      expect(Fastlane::UI).to receive(:user_error!)
-
+      expect(Fastlane::UI).to receive(:user_error!).at_least(:once)
       run_with({dsym_path: 'fake/file/path'})
     end
 
     it 'rejects dSYM files which are not a .zip or a directory' do
-      expect(Fastlane::UI).to receive(:user_error!)
-
+      expect(Fastlane::UI).to receive(:user_error!).at_least(:once)
       run_with({dsym_path: File.join(FIXTURE_PATH, 'invalid_file')})
     end
 
@@ -135,9 +135,10 @@ describe Action do
 
     it 'uses default API key argument from plist' do
       root_path = "/test/test/test"
+      api_key = "12345678901234567890123456789AAA" # Uses the API Key from ./spec/fixtures/ios_proj/FirstRealFolder/Info.plist
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
                                               "--silent",
-                                              "--api-key", "3443f00f3443f00f3443f00f3443f00f",
+                                              "--api-key", api_key,
                                               "--project-root", root_path,
                                               FIXTURE_PATH).and_return(true)
       Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
@@ -147,21 +148,24 @@ describe Action do
 
     it 'uses legacy API key argument from plist' do
       root_path = "/test/test/test"
+      api_key = "12345678901234567890123456789BBB" # Uses the API Key from ./spec/fixtures/ios_proj_legacy/Project/Info.plist
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
                                               "--silent",
-                                              "--api-key", "legacy-key",
+                                              "--api-key", api_key,
                                               "--project-root", root_path,
                                               FIXTURE_PATH).and_return(true)
       Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj_legacy')) do
-        Action.run(load_default_opts.merge({dsym_path: FIXTURE_PATH, project_root: root_path}))
+        run_with({dsym_path: FIXTURE_PATH, project_root: root_path})
       end
     end
-    
-    it 'allows config file to overwrite parameter' do
-      api_key = "123456789123456789001234567890FF"
+
+    it 'allows option input to overwrite the config file api key' do
+      # The order of precedence is 1. option input, 2. env variable, 3. default or config file input (for api key only)
+      # The API key in ./spec/fixtures/ios_proj_legacy/Project/Info.plist is 12345678912345678900123456789AAA.
+      api_key = "12345678912345678900123456789CCC"
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
                                               "--silent",
-                                              "--api-key", "faaffaaffaaffaaffaaffaaffaaffaaf",
+                                              "--api-key", api_key,
                                               "--project-root", File.join(FIXTURE_PATH, 'ios_proj'),
                                               FIXTURE_PATH).and_return(true)
       Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
