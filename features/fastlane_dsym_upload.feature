@@ -26,13 +26,13 @@ Feature: Uploading dSYMs to Bugsnag using Fastlane
         And the field "dsym" for multipart request 0 is not null
         And the field "dsym" for multipart request 1 is not null
 
-    Scenario: Uploading dSYMs using API key and config file together uses api key from config file
-        When I run lane "upload_symbols" with dsym_path set to "dsyms.zip", api_key set to "1234567890abcde" and config_file set to "TestList.plist"
+    Scenario: Uploading dSYMs using API key and config file together uses api key from input parameter
+        When I run lane "upload_symbols" with dsym_path set to "dsyms.zip", api_key set to "1234567890ABCDEF1234567890AAAAAA" and config_file set to "TestList.plist"
         Then I should receive 2 requests
         And the field "dsym" for multipart request 0 is not null
-        And the field "apiKey" for multipart request 0 equals "random-key"
+        And the field "apiKey" for multipart request 0 equals "1234567890ABCDEF1234567890AAAAAA"
         And the field "dsym" for multipart request 1 is not null
-        And the field "apiKey" for multipart request 1 equals "random-key"
+        And the field "apiKey" for multipart request 1 equals "1234567890ABCDEF1234567890AAAAAA"
 
     Scenario: Uploading dSYMs using API key and empty config file
         When I run lane "upload_symbols" with dsym_path set to "dsyms.zip", api_key set to "1234567890ABCDEF1234567890ABCDEF" and config_file set to "NoApiKey.plist"
@@ -65,4 +65,3 @@ Feature: Uploading dSYMs to Bugsnag using Fastlane
         And the field "apiKey" for multipart request 2 equals "1234567890ABCDEF1234567890ABCDEF"
         And the field "dsym" for multipart request 3 is not null
         And the field "apiKey" for multipart request 3 equals "1234567890ABCDEF1234567890ABCDEF"
-
