@@ -1,3 +1,10 @@
+## TBD
+
+### Enhancements
+
+* Ensure `curl` sets a non-zero exit code on failure.
+  [#39](https://github.com/bugsnag/bugsnag-dsym-upload/pull/39)
+
 ## 1.4.2 (2020-04-02)
 
 ### Bug fixes
