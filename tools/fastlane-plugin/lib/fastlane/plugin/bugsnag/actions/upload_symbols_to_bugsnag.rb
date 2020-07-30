@@ -8,9 +8,10 @@ module Fastlane
       def self.run(params)
         # If we have not explicitly set an API key through env, or parameter
         # input in Fastfile, find an API key in the Info.plist in config_file param
+        api_key = params[:api_key]
         if params[:config_file] && params[:api_key] == nil
           UI.message("Using the API Key from #{params[:config_file]}")
-          params[:api_key] = options_from_info_plist(params[:config_file])[:apiKey]
+          api_key = options_from_info_plist(params[:config_file])[:apiKey]
         end
 
         verbose = UI.verbose("Uploading dSYMs to Bugsnag with the following parameters:")
