@@ -229,6 +229,7 @@ module Fastlane
       def self.default_info_plist_path
         Dir.glob("./{ios/,}*/Info.plist").reject {|path| path =~ /build|test/i }.first
       end
+
       def self.load_options_from_plist file_path
         options = {}
         plist_getter = Fastlane::Actions::GetInfoPlistValueAction
@@ -246,12 +247,14 @@ module Fastlane
       def self.default_android_manifest_path
         Dir.glob("./{android/,}{app,}/src/main/AndroidManifest.xml").first
       end
+
       def self.load_options_from_xml file_path
         options = options_from_android_manifest(file_path)
         build_gradle_path = Dir.glob("{android/,}app/build.gradle").first || Dir.glob("build.gradle").first
         options.merge!(options_from_build_gradle(build_gradle_path)) if build_gradle_path
         return options
       end
+
       def self.options_from_android_manifest file_path
         options = {}
         begin
@@ -264,6 +267,7 @@ module Fastlane
         end
         options
       end
+
       def self.options_from_build_gradle file_path
         options = {}
         begin
@@ -278,6 +282,7 @@ module Fastlane
         end
         options
       end
+
       def self.parse_android_manifest_options config_hash
         map_meta_data(get_meta_data(config_hash))
       end
