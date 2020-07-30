@@ -125,7 +125,7 @@ module Fastlane
           FastlaneCore::ConfigItem.new(key: :config_file,
                                        description: "AndroidManifest.xml/Info.plist location",
                                        optional: true,
-                                       default_value: default_config_file),
+                                       default_value: default_config_file_path),
           FastlaneCore::ConfigItem.new(key: :api_key,
                                        description: "Bugsnag API Key",
                                        optional: true),
@@ -190,7 +190,7 @@ module Fastlane
       end
 
       # Used to get a default configuration file (AndroidManifest.xml or Info.plist)
-      def self.default_config_file
+      def self.default_config_file_path
         case lane_context[:PLATFORM_NAME]
         when nil
           if file_path = default_android_manifest_path
