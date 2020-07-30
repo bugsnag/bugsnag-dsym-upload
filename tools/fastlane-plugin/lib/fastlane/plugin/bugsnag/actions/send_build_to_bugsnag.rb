@@ -15,20 +15,20 @@ module Fastlane
           UI.message("Loading build information from #{params[:config_file]}")
           config_options = load_config_file_options(params[:config_file])
 
-          # for each of the config options, if it's not been overriden by any?
+          # for each of the config options, if it's not been overriden by any
           # input to the lane, write it to the payload:
-          params[:api_key].nil? ? payload[:apiKey] = config_options[:apiKey] : payload[:apiKey] = params[:api_key]
-          params[:app_version].nil? ? payload[:appVersion] = config_options[:appVersion] : payload[:appVersion] = params[:app_version]
-          params[:android_version_code].nil? ? payload[:appVersionCode] = config_options[:appVersionCode] : payload[:appVersionCode] = params[:android_version_code]
-          params[:ios_bundle_version].nil? ? payload[:appBundleVersion] = config_options[:appBundleVersion] : payload[:appBundleVersion] = params[:ios_bundle_version]
-          params[:release_stage].nil? ? payload[:releaseStage] = "production" : payload[:releaseStage] = params[:release_stage]
+          payload[:apiKey] = params[:api_key] || config_options[:apiKey]
+          payload[:appVersion] = params[:app_version] || config_options[:appVersion]
+          payload[:appVersionCode] = params[:android_version_code] || config_options[:appVersionCode]
+          payload[:appBundleVersion] = params[:ios_bundle_version] || config_options[:appBundleVersion]
+          payload[:releaseStage] = params[:release_stage] || "production"
         else
           # No configuration file was found or specified, use the input parameters:
           payload[:apiKey] = params[:api_key]
           payload[:appVersion] = params[:app_version]
           payload[:appVersionCode] = params[:android_version_code]
           payload[:appBundleVersion] = params[:ios_bundle_version]
-          params[:release_stage].nil? ? payload[:releaseStage] = "production" : params[:release_stage] = params[:release_stage]
+          payload[:releaseStage] = params[:release_stage] || "production"
         end
 
         # If builder, or source control information has been provided into
