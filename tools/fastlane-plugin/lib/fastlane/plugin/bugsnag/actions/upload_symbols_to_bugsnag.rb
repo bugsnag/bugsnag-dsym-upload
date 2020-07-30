@@ -13,16 +13,16 @@ module Fastlane
           params[:api_key] = options_from_info_plist(params[:config_file])[:apiKey]
         end
 
-        if params[:verbose]
-          UI.message("Uploading dSYMs to Bugsnag with the following parameters:")
+        verbose = UI.verbose("Uploading dSYMs to Bugsnag with the following parameters:")
+        if verbose
           params.values.each do |param|
-            UI.message("  #{param[0].to_s.rjust(18)}: #{param[1]}")
+            UI.verbose("  #{param[0].to_s.rjust(18)}: #{param[1]}")
           end
         end
 
         parse_dsym_paths(params[:dsym_path]).each do |dsym_path|
           if dsym_path.end_with?(".zip") or File.directory?(dsym_path)
-            args = upload_args(dsym_path, params[:symbol_maps_path], params[:upload_url], params[:project_root], params[:api_key], params[:verbose])
+            args = upload_args(dsym_path, params[:symbol_maps_path], params[:upload_url], params[:project_root], api_key, verbose)
             success = Kernel.system(UPLOAD_SCRIPT_PATH, *args)
             if success
               UI.success("Uploaded dSYMs in #{dsym_path}")
@@ -115,12 +115,7 @@ module Fastlane
                                        env_name: "BUGSNAG_CONFIG_FILE",
                                        description: "Info.plist location",
                                        optional: true,
-                                       default_value: default_info_plist_path),
-          FastlaneCore::ConfigItem.new(key: :verbose,
-                                       env_name: "BUGSNAG_VERBOSE",
-                                       description: "Print helpful debug info",
-                                       skip_type_validation: true,
-                                       optional: true),
+                                       default_value: default_info_plist_path)
         ]
       end
 
