@@ -31,14 +31,6 @@ describe Action do
       run_with({dsym_path: FIXTURE_PATH})
     end
 
-    it 'prints verbose if verbose flag set' do
-      expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
-                                              "--verbose",
-                                              "--project-root", Dir::pwd,
-                                              FIXTURE_PATH).and_return(true)
-      run_with({dsym_path: FIXTURE_PATH, verbose: true})
-    end
-
     it 'UI.user_error when script fails' do
       expect(Fastlane::UI).to receive(:user_error!).with("Failed uploading #{FIXTURE_PATH}")
       expect(Kernel).to receive(:system).with(Action::UPLOAD_SCRIPT_PATH,
