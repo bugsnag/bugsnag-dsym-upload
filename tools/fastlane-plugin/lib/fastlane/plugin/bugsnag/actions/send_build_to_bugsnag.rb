@@ -21,7 +21,7 @@ module Fastlane
           payload[:appVersion] = params[:app_version] || config_options[:appVersion]
           payload[:appVersionCode] = params[:android_version_code] || config_options[:appVersionCode]
           payload[:appBundleVersion] = params[:ios_bundle_version] || config_options[:appBundleVersion]
-          payload[:releaseStage] = params[:release_stage] || "production"
+          payload[:releaseStage] = params[:release_stage] || config_options[:releaseStage] || "production"
         else
           # No configuration file was found or specified, use the input parameters:
           payload[:apiKey] = params[:api_key]
@@ -235,10 +235,12 @@ module Fastlane
         plist_getter = Fastlane::Actions::GetInfoPlistValueAction
         bugsnag_dict = plist_getter.run(path: file_path, key: "bugsnag")
         api_key = bugsnag_dict["apiKey"] unless bugsnag_dict.nil?
+        release_stage = bugsnag_dict["releaseStage"] unless bugsnag_dict.nil?
         if api_key.nil?
           api_key = plist_getter.run(path: file_path, key: "BugsnagAPIKey")
         end
         options[:apiKey] = api_key
+        options[:releaseStage] = release_stage
         options[:appVersion] = plist_getter.run(path: file_path, key: "CFBundleShortVersionString")
         options[:appBundleVersion] = plist_getter.run(path: file_path, key: "CFBundleVersion")
         return options
