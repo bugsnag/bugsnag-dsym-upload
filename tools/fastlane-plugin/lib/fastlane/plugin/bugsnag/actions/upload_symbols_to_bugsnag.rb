@@ -14,11 +14,11 @@ module Fastlane
           api_key = options_from_info_plist(params[:config_file])[:apiKey]
         end
 
+        # If verbose flag is enabled (`--verbose`), display the plugin action debug info
+        # Store the verbose flag for use in the upload arguments.
         verbose = UI.verbose("Uploading dSYMs to Bugsnag with the following parameters:")
-        if verbose
-          params.values.each do |param|
-            UI.verbose("  #{param[0].to_s.rjust(18)}: #{param[1]}")
-          end
+        params.values.each do |param|
+          UI.verbose("  #{param[0].to_s.rjust(18)}: #{param[1]}")
         end
 
         parse_dsym_paths(params[:dsym_path]).each do |dsym_path|

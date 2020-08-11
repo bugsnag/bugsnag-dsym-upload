@@ -47,12 +47,10 @@ module Fastlane
           UI.user_error! missing_app_version_message(params)
         end
 
-        # Is the Fastlane verbose flag enabled? store local flag
-        verbose = UI.verbose("Sending build to Bugsnag with payload:")
-        if verbose
-          payload.each do |param|
-            UI.verbose("  #{param[0].to_s.rjust(18)}: #{param[1]}")
-          end
+        # If verbose flag is enabled (`--verbose`), display the payload debug info
+        UI.verbose("Sending build to Bugsnag with payload:")
+        payload.each do |param|
+          UI.verbose("  #{param[0].to_s.rjust(18)}: #{param[1]}")
         end
 
         send_notification(params[:endpoint], ::JSON.dump(payload))
