@@ -1,7 +1,7 @@
 # How to contribute
 
 * [Fork](https://help.github.com/articles/fork-a-repo) the
-  [repository on github](https://github.com/bugsnag/bugsnag-cocoa)
+  [repository on github](https://github.com/bugsnag/bugsnag-dsym-upload)
 * Commit and push until you are happy with your contribution
 * Test your changes
 * [Make a pull request](https://help.github.com/articles/using-pull-requests)
