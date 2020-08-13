@@ -12,6 +12,14 @@
 Install the dependencies with `make bootstrap`, then run the unit and
 integration suites with `make test`
 
+## Testing the fastlane plugin
+
+Open the `tools/fastlane-plugin` directory, then:
+
+1. Build the gem using `rake build`
+2. Install the built gem using `gem install fastlane-plugin-bugsnag-{version}.gem`
+3. Add the plugin to your Fastlane project using `fastlane add_plugin bugsnag`
+
 ## Releasing a new version
 
 1. Update the CHANGELOG with new content
