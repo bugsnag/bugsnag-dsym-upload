@@ -42,16 +42,16 @@ Then add the `upload_symbols_to_bugsnag` action to your lane:
 
 ```ruby
 lane :refresh_dsyms do
-  download_dsyms
-  upload_symbols_to_bugsnag
-  clean_build_artifacts
+  download_dsyms(version: "1.4.2.1")     # Download dSYM files from App Store Connect
+  upload_symbols_to_bugsnag              # Upload them to Bugsnag
+  clean_build_artifacts                  # Delete the local dSYM files
 end
 ```
 
 Common options:
 
 * `api_key`: The API key associated with the project. Informs Bugsnag which project 
-  this dSYM should be applied to.
+  the dSYMs should be applied to.
 * `dsym_path`: A path or array of paths for directories containing \*.dSYM files
   or a single \*.zip file to upload. If unspecified, the default behavior is to
   upload the zip files retrieved by a prior invocation of
@@ -60,11 +60,16 @@ Common options:
 * `upload_url`: The URL of the server receiving symbol files. Update this value
   if you are using a private instance of Bugsnag
 * `config_file`: The path to the project's Info.plist. Set this value if your configuration file 
-  is not automatically detected. If set the API key read from this configuration 
-  file overrides the `api_key` option
+  is not automatically detected.
 
-View usage additional usage information and options by running `fastlane action
-upload_symbols_to_bugsnag`.
+View usage additional usage information and options by running:
+
+```shell
+fastlane action upload_symbols_to_bugsnag
+```
+
+For more information, take a look at the Bugsnag docs on 
+[using the Fastfile plugin](https://docs.bugsnag.com/build-integrations/fastlane/).
 
 Check out the [example `Fastfile`](tools/fastlane-plugin/fastlane/Fastfile) to
 see how to use this plugin.  Try it by cloning the repo, running `fastlane

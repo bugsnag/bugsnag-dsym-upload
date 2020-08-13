@@ -6,21 +6,24 @@ module Fastlane
         File.join(File.dirname(__FILE__), '..', '..', '..', '..', '..', 'bugsnag-dsym-upload'))
 
       def self.run(params)
-        options = {}
-        options = options_from_info_plist(params[:config_file]) if params[:config_file]
+        # If we have not explicitly set an API key through env, or parameter
+        # input in Fastfile, find an API key in the Info.plist in config_file param
+        api_key = params[:api_key]
+        if params[:config_file] && params[:api_key] == nil
+          UI.message("Using the API Key from #{params[:config_file]}")
+          api_key = options_from_info_plist(params[:config_file])[:apiKey]
+        end
 
-        if (params[:config_file] == default_info_plist_path || options[:apiKey].nil? || options[:apiKey].empty?)
-          # Load custom API key if config file has not been overridden or the API key couldn't be found in config files
-          options[:apiKey] = params[:api_key] unless params[:api_key].nil?
-        else
-          # Print which file is populating version and API key information since the value has been
-          # overridden
-          UI.message("Loading API key from #{params[:config_file]}")
+        # If verbose flag is enabled (`--verbose`), display the plugin action debug info
+        # Store the verbose flag for use in the upload arguments.
+        verbose = UI.verbose("Uploading dSYMs to Bugsnag with the following parameters:")
+        params.values.each do |param|
+          UI.verbose("  #{param[0].to_s.rjust(18)}: #{param[1]}")
         end
 
         parse_dsym_paths(params[:dsym_path]).each do |dsym_path|
           if dsym_path.end_with?(".zip") or File.directory?(dsym_path)
-            args = upload_args(dsym_path, params[:symbol_maps_path], params[:upload_url], params[:project_root], options[:apiKey], params[:verbose])
+            args = upload_args(dsym_path, params[:symbol_maps_path], params[:upload_url], params[:project_root], api_key, verbose)
             success = Kernel.system(UPLOAD_SCRIPT_PATH, *args)
             if success
               UI.success("Uploaded dSYMs in #{dsym_path}")
@@ -34,7 +37,7 @@ module Fastlane
       end
 
       def self.description
-        "Uploads symbol files to Bugsnag"
+        "Uploads dSYM debug symbol files to Bugsnag"
       end
 
       def self.authors
@@ -66,27 +69,25 @@ module Fastlane
         end
         validate_symbol_maps = proc do |path|
           return if path.nil?
-
           unless File.exist?(path) and File.directory?(path)
             UI.user_error!("Symbol maps file needs to be a directory containing symbol map files")
           end
         end
         validate_api_key = proc do |key|
           return if key.nil?
-
           unless !key[/\H/] and key.length == 32
             UI.user_error!("API key should be a 32 character hexadecimal string")
           end
         end
 
-        options = {}
-        options = options_from_info_plist(default_info_plist_path) if file_path = default_info_plist_path
+        # If the Info.plist is in a default location, we'll get API key here
+        # This will be overwritten if you pass in an API key parameter in your
+        # Fastfile, or have an API key environment variable set.
         [
           FastlaneCore::ConfigItem.new(key: :api_key,
                                        env_name: "BUGSNAG_API_KEY",
                                        description: "Bugsnag API Key",
                                        optional: true,
-                                       default_value: options[:apiKey],
                                        verify_block: validate_api_key),
           FastlaneCore::ConfigItem.new(key: :dsym_path,
                                        type: Array,
@@ -112,27 +113,32 @@ module Fastlane
                                        default_value: Dir::pwd,
                                        optional: true),
           FastlaneCore::ConfigItem.new(key: :config_file,
+                                       env_name: "BUGSNAG_CONFIG_FILE",
                                        description: "Info.plist location",
                                        optional: true,
-                                       default_value: options[:config_file]),
-          FastlaneCore::ConfigItem.new(key: :verbose,
-                                       env_name: "BUGSNAG_VERBOSE",
-                                       description: "Print helpful debug info",
-                                       skip_type_validation: true,
-                                       optional: true),
+                                       default_value: default_info_plist_path)
         ]
       end
 
       private
 
       def self.default_info_plist_path
-        Dir.glob("./{ios/,}*/Info.plist").reject {|path| path =~ /build|test/i }.first
+        # Find first 'Info.plist' in the current working directory
+        # ignoring any in 'build', or 'test' folders
+        return Dir.glob("./{ios/,}*/Info.plist").reject{|path| path =~ /build|test/i }.first
       end
 
       def self.options_from_info_plist file_path
         plist_getter = Fastlane::Actions::GetInfoPlistValueAction
+        bugsnag_dict = plist_getter.run(path: file_path, key: "bugsnag")
+        api_key = bugsnag_dict["apiKey"] unless bugsnag_dict.nil?
+        # From v6.0.0 of bugsnag-cocoa, the API key is in 'bugsnag.apiKey',
+        # use 'BugsnagAPIKey' as a fallback if it exists (<v6.x.x)
+        if api_key.nil?
+          api_key = plist_getter.run(path: file_path, key: "BugsnagAPIKey")
+        end
         {
-          apiKey: plist_getter.run(path: file_path, key: "BugsnagAPIKey"),
+          apiKey: api_key,
           config_file: file_path,
         }
       end

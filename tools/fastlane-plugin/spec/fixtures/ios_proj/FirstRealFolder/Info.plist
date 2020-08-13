@@ -2,8 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>BugsnagAPIKey</key>
-    <string>other-key</string>
+	<key>bugsnag</key>
+	<dict>
+		<key>apiKey</key>
+		<string>12345678901234567890123456789AAA</string>
+	</dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -17,9 +20,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>3.0-other</string>
+	<string>2.0-other</string>
 	<key>CFBundleVersion</key>
-	<string>56</string>
+	<string>22</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -45,5 +48,3 @@
 	</array>
 </dict>
 </plist>
-
-

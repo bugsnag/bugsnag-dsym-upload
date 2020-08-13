@@ -1,7 +1,18 @@
-## TBD
+## 2.0.0 (2020-08-13)
+
+### Changes
+
+* Order of precedence for inputs is now set, configuration file options are no longer forced to override. The order of precedence is now:
+1. An input given in your `Fastfile`
+1. An environment variable (`upload_symbols_to_bugsnag` only)
+1. A configuration file value
+1. A default value
+* `verbose` inputs to Fastlane actions have been removed, and is now controlled by the use of the `--verbose` input flag to the fastlane call. Verbose mode now produces a lot more useful output for debugging.
 
 ### Enhancements
 
+* Allows use of environment variable `BUGSNAG_CONFIG_FILE` to set `config_file` parameter in `upload_symbols_to_bugsnag` action
+  [#41](https://github.com/bugsnag/bugsnag-dsym-upload/pull/41)
 * Ensure `curl` sets a non-zero exit code on failure.
   [#39](https://github.com/bugsnag/bugsnag-dsym-upload/pull/39)
 
