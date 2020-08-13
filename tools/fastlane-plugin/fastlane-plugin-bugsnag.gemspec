@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = %q{iskanamagus@gmail.com}
 
   spec.summary       = %q{Uploads dSYM files to Bugsnag}
-  spec.homepage      = "https://github.com/bugsnag/bugsnag-upload"
+  spec.homepage      = "https://github.com/bugsnag/bugsnag-dsym-upload"
   spec.license       = "MIT"
 
   spec.files         = Dir["lib/**/*"] + %w(LICENSE.txt bugsnag-dsym-upload)

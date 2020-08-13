@@ -8,3 +8,4 @@ features/fixtures/fl-project/Gemfile.lock
 features/fixtures/fl-project/fastlane/README.md
 features/fixtures/fl-project/fastlane/report.xml
 .DS_Store
+Gemfile.lock
