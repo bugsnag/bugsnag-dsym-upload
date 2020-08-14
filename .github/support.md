@@ -7,9 +7,15 @@ When contacting support, please include as much information as necessary, includ
 
 - example code snippet
 - steps to reproduce
-- notifier version
-- environment / OS 
 - expected/actual behaviour 
+
+* basic: curl version:
+* homebrew: ruby version:
+* fastlane:
+    * fastlane version:
+    * Related environment variables (if applicable):
+    * Info.plist or AndroidManifest.xml (if applicable):
+    * Copy of Fastfile:
 
 ## Bug or Feature Requests
 If you would like to raise a bug or feature request please do so by creating a [New Issue](https://github.com/bugsnag/bugsnag-dsym-upload/issues/new/choose) and selecting bug or feature.
