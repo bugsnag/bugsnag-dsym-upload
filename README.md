@@ -23,7 +23,7 @@ bugsnag-dsym-upload`
 Install via the Homebrew formula:
 
 ```
-brew install bugsnag/bugsnag-tap/bugsnag-dsym-upload
+brew install bugsnag/tap/bugsnag-dsym-upload
 ```
 
 This will also add the Bugsnag Homebrew tap for future updates.
