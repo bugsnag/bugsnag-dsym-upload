@@ -18,17 +18,15 @@ install to the default directory, `/usr/lib/bin`.
 View usage [here](man/bugsnag-dsym-upload.pod) or using `man
 bugsnag-dsym-upload`
 
-### Homebrew
+### [Homebrew](https://brew.sh)
 
-Install via the [Homebrew](https://brew.sh) formula:
+Install via the Homebrew formula:
 
 ```
-brew install \
-  https://raw.github.com/bugsnag/bugsnag-upload/master/tools/homebrew/bugsnag-dsym-upload.rb
+brew install bugsnag/bugsnag-tap/bugsnag-dsym-upload
 ```
 
-View usage [here](man/bugsnag-dsym-upload.pod) or using `man
-bugsnag-dsym-upload`
+This will also add the Bugsnag Homebrew tap for future updates.
 
 ### [Fastlane](https://fastlane.tools)
 
