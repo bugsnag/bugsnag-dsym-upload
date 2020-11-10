@@ -77,4 +77,6 @@ If you have trouble using plugins, check out the [Plugins
 Troubleshooting](https://docs.fastlane.tools/plugins/plugins-troubleshooting/)
 guide.
 
-## [License](LICENSE.txt)
+## License
+
+This module is free software released under the MIT License. See [LICENSE.txt](LICENSE.txt) for details.
