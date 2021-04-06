@@ -178,11 +178,22 @@ for dsym in $dsym_dir/*.dSYM; do
     done
 done
 
+exit_code=0
 if [ $success_count -gt 0 ]; then
-    log "$success_count files uploaded successfully"
+    log "$success_count file(s) uploaded successfully"
+fi
+
+if [ $warning_count -gt 0 ]; then
+    log "$warning_count file(s) failed to upload with warnings"
 fi
 
 if [ $fail_count -gt 0 ]; then
-    log "$fail_count files failed to upload"
-    exit 1
+    exit_code=1
+    log "$fail_count file(s) failed to upload with errors"
 fi
+
+if [ $fail_count -gt 0 ] || [ $warning_count -gt 0 ]; then
+    log "Re-run the bugsnag-dsym-upload tool with the --verbose option for more information"
+fi
+
+exit $exit_code
