@@ -117,10 +117,20 @@ fi
 
 log_verbose "Uploading files to $upload_server"
 success_count=0
+warning_count=0
 fail_count=0
 
 for dsym in $dsym_dir/*.dSYM; do
     log_verbose "Preparing to upload $dsym"
+
+    # check if the .dSYM is a file. Throw a warning if detected as such; it should be a directory
+    # This can happen due to a bug in Xcode: https://developer.apple.com/forums/thread/659187
+    if [ -f $dsym ]; then
+        dsym_size=$(wc -c < "$dsym" | xargs)
+        log_verbose "Skipping $dsym as it's is a file ($dsym_size bytes), not a directory with DWARF data";
+        warning_count=$((warning_count+1))
+        continue
+    fi
 
     if [[ -d $symbol_maps ]]; then
         log_verbose "Updating file with bitcode symbol maps in $symbol_maps"
