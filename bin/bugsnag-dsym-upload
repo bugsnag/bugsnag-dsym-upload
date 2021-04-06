@@ -127,7 +127,7 @@ for dsym in $dsym_dir/*.dSYM; do
     # This can happen due to a bug in Xcode: https://developer.apple.com/forums/thread/659187
     if [ -f $dsym ]; then
         dsym_size=$(wc -c < "$dsym" | xargs)
-        log_verbose "Skipping $dsym as it's is a file ($dsym_size bytes), not a directory with DWARF data";
+        log_verbose "[WARNING] Skipping $dsym as it's is a file ($dsym_size bytes), not a directory with DWARF data";
         warning_count=$((warning_count+1))
         continue
     fi
@@ -139,7 +139,7 @@ for dsym in $dsym_dir/*.dSYM; do
 
     dwarf_data=$dsym/Contents/Resources/DWARF
     if [[ ! -d $dwarf_data ]]; then
-        log_verbose "Skipping file missing DWARF data: $dsym"
+        log_verbose "[ERROR] Skipping file missing DWARF data: $dsym"
         fail_count=$((fail_count+1))
         continue
     fi
@@ -167,12 +167,12 @@ for dsym in $dsym_dir/*.dSYM; do
                 success_count=$((success_count+1))
             else
                 fail_count=$((fail_count+1))
-                log_verbose "Failed to upload file: $file"
+                log_verbose "[ERROR] Failed to upload file: $file"
             fi
             echo $output | grep -v '^OK$'
             log
         else
-            log_verbose "Skipping file without UUID: $file"
+            log_verbose "[ERROR] Skipping file without UUID: $file"
             fail_count=$((fail_count+1))
         fi
     done
