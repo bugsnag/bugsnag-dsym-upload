@@ -10,7 +10,7 @@ jobs:
     - stage: test
       os: linux
       language: ruby
-      dist: trusty
+      dist: xenial
       sudo: false
       before_install:
       - sudo apt-get -qq update
@@ -25,7 +25,7 @@ jobs:
       - cd tools/fastlane-plugin && bundle exec rake spec
     - stage: test
       os: osx
-      osx_image: xcode9
+      osx_image: xcode11
       script:
       - export BUNDLE_GEMFILE=
       - "mkdir -p vendor/{fastlane-bundle,bundle}"
