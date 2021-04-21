@@ -65,3 +65,13 @@ Feature: Uploading dSYMs to Bugsnag using Fastlane
         And the field "apiKey" for multipart request 2 equals "1234567890ABCDEF1234567890ABCDEF"
         And the field "dsym" for multipart request 3 is not null
         And the field "apiKey" for multipart request 3 equals "1234567890ABCDEF1234567890ABCDEF"
+
+    Scenario: Skipping over a zero byte dSYM with warning
+        When I run lane "upload_symbols" with dsym_path set to "ZeroByteDsym/"
+        Then I should receive 0 requests
+        Then the exit status should be 0
+
+    Scenario: Throw failure if dSYM is missing DWARF data
+        When I run lane "upload_symbols" with dsym_path set to "MissingDWARFdSYM/"
+        Then I should receive 0 requests
+        Then the exit status should be 1
