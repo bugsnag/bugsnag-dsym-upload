@@ -1,3 +1,10 @@
+## TBC (TBC)
+
+### Enhancements
+
+* Throw warning if 0 byte dSYM file is attempted to be uploaded
+  [#52](https://github.com/bugsnag/bugsnag-dsym-upload/pull/52)
+
 ## 2.0.0 (2020-08-13)
 
 ### Changes
