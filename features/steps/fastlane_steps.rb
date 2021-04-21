@@ -22,5 +22,5 @@ When("I run lane {string} with dsym_path set to {string}, api_key set to {string
 end
 
 Then("the exit status should be {int}") do |int|
-  assert_equal($?.exitstatus, int)
+  assert_equal(int, $?.exitstatus)
 end
