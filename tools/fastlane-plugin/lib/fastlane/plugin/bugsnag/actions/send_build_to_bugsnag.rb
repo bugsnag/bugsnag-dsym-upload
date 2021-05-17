@@ -225,7 +225,7 @@ module Fastlane
       end
 
       def self.default_info_plist_path
-        Dir.glob("./{ios/,}*/Info.plist").reject {|path| path =~ /build|test/i }.first
+        Dir.glob("./{ios/,}*/Info.plist").reject {|path| path =~ /build|test/i }.sort.first
       end
 
       def self.load_options_from_plist file_path
