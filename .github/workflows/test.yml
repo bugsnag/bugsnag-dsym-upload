@@ -1,0 +1,42 @@
+name: 'bugsnag-dsym-upload tests'
+
+on: push
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby-version: ['2.5']
+        os: [ubuntu-20.04, macos-10.15]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby-version }}
+
+    - name: install dependencies (Ubuntu only)
+      if: contains(matrix.os, 'ubuntu')
+      run: |
+        sudo apt-get -qq update
+        sudo apt-get install -y llvm
+        sudo ln -s $(which llvm-dwarfdump) $(dirname $(which llvm-dwarfdump))/dwarfdump
+
+    - run: mkdir -p vendor/{fastlane-bundle,bundle}
+
+    - name: run specs
+      run: |
+        bundle config path vendor/fastlane-bundle
+        bundle install --gemfile=tools/fastlane-plugin/Gemfile
+        cd tools/fastlane-plugin
+        bundle exec rspec
+
+    - name: run MazeRunner (macOS only)
+      if: contains(matrix.os, 'macos')
+      run: |
+        bundle config path vendor/bundle
+        bundle install --gemfile=Gemfile
+        bundle exec maze-runner features/*.feature
