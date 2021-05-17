@@ -22,7 +22,8 @@ jobs:
       - bundle install --gemfile=tools/fastlane-plugin/Gemfile
       - export BUNDLE_GEMFILE=
       script:
-      - cd tools/fastlane-plugin && bundle exec rake spec
+      - cd tools/fastlane-plugin && bundle exec rspec
+
     - stage: test
       os: osx
       osx_image: xcode9
@@ -34,4 +35,4 @@ jobs:
       - bundle exec maze-runner features/*.feature
       - bundle config path vendor/fastlane-bundle
       - bundle install --gemfile=tools/fastlane-plugin/Gemfile
-      - cd tools/fastlane-plugin && bundle exec rake spec
+      - cd tools/fastlane-plugin && bundle exec rspec
