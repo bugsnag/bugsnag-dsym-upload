@@ -5,6 +5,9 @@
 * Throw warning if 0 byte dSYM file is attempted to be uploaded
   [#52](https://github.com/bugsnag/bugsnag-dsym-upload/pull/52)
 
+* Files found with `Dir.glob` are now sorted alphabetically so that this action is deterministic accross OS's
+  [#57](https://github.com/bugsnag/bugsnag-dsym-upload/pull/57)
+
 ## 2.0.0 (2020-08-13)
 
 ### Changes
