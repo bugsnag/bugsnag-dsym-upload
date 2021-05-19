@@ -245,12 +245,12 @@ module Fastlane
       end
 
       def self.default_android_manifest_path
-        Dir.glob("./{android/,}{app,}/src/main/AndroidManifest.xml").first
+        Dir.glob("./{android/,}{app,}/src/main/AndroidManifest.xml").sort.first
       end
 
       def self.load_options_from_xml file_path
         options = options_from_android_manifest(file_path)
-        build_gradle_path = Dir.glob("{android/,}app/build.gradle").first || Dir.glob("build.gradle").first
+        build_gradle_path = Dir.glob("{android/,}app/build.gradle").sort.first || Dir.glob("build.gradle").sort.first
         options.merge!(options_from_build_gradle(build_gradle_path)) if build_gradle_path
         return options
       end
