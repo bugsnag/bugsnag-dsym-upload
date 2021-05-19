@@ -192,7 +192,7 @@ if [ $fail_count -gt 0 ]; then
     log "$fail_count file(s) failed to upload with errors"
 fi
 
-if [ $fail_count -gt 0 ] || [ $warning_count -gt 0 ]; then
+if [[ $fail_count -gt 0 || $warning_count -gt 0 ]] && [[ $verbose != 1 ]]; then
     log "Re-run the bugsnag-dsym-upload tool with the --verbose option for more information"
 fi
 
