@@ -24,7 +24,7 @@ def fastlane_upload_symbols(lane, dsym_path=nil, api_key=nil, config_file=nil)
        #{dsym_path_env} \
        #{api_key_env} \
        #{config_file_env} \
-       bundle exec fastlane #{lane} --verbose`
+       bundle exec fastlane #{lane}`
     end
   end
 end
