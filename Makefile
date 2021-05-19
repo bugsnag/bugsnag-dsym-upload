@@ -28,7 +28,7 @@ bootstrap:
 	@cd tools/fastlane-plugin && bundle install
 
 test_unit:
-	@cd tools/fastlane-plugin && bundle exec rake spec
+	@cd tools/fastlane-plugin && bundle exec rspec
 
 test_features:
 	@bundle exec maze-runner -c features/*.feature
