@@ -16,6 +16,15 @@ Feature: Uploading dSYMs to Bugsnag
         And the field "dsym" for multipart request 1 is not null
         Then the exit status should be 0
 
+    Scenario: Uploading a zip file containing directory of dSYM files that was compressed with macOS Archive Utility
+        When I upload dSYMS with options "features/fixtures/macos-compressed-dsyms.zip"
+        Then I should receive 2 requests
+        And the HTTP version is "1.1" for request 0
+        And the HTTP version is "1.1" for request 1
+        And the field "dsym" for multipart request 0 is not null
+        And the field "dsym" for multipart request 1 is not null
+        Then the exit status should be 0
+
     Scenario: Uploading a zip file containing single dSYM files
         When I upload dSYMS with options "features/fixtures/app.dSYM.zip"
         Then I should receive 1 requests

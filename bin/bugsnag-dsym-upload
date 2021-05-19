@@ -120,7 +120,7 @@ success_count=0
 warning_count=0
 fail_count=0
 
-for dsym in $(find $dsym_dir -type d -name *.dSYM); do
+for dsym in $(find $dsym_dir -type d -name "*.dSYM" ! -path "*/__MACOSX/*"); do
     log_verbose "Preparing to upload $dsym"
 
     # check if the .dSYM is a file. Throw a warning if detected as such; it should be a directory
