@@ -32,7 +32,7 @@ jobs:
         bundle config path vendor/fastlane-bundle
         bundle install --gemfile=tools/fastlane-plugin/Gemfile
         cd tools/fastlane-plugin
-        bundle exec rake spec
+        bundle exec rspec
 
     - name: run MazeRunner (macOS only)
       if: contains(matrix.os, 'macos')
