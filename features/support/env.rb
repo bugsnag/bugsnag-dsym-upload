@@ -13,10 +13,11 @@ Bundler.with_clean_env do
   end
 end
 
-def fastlane_upload_symbols(lane, dsym_path=nil, api_key=nil, config_file=nil)
+def fastlane_upload_symbols(lane, dsym_path=nil, api_key=nil, config_file=nil, override=nil)
   api_key_env = "BUGSNAG_API_KEY='#{api_key}'" unless api_key.nil?
   config_file_env = "BUGSNAG_CONFIG_FILE='#{config_file}'" unless config_file.nil?
   dsym_path_env = "BUGSNAG_DSYM_PATH='#{dsym_path}'" unless dsym_path.nil?
+  override_env = "BUGSNAG_OVERRIDE='#{override}'" unless override.nil?
 
   Bundler.with_clean_env do
     Dir.chdir 'features/fixtures/fl-project' do
@@ -24,6 +25,7 @@ def fastlane_upload_symbols(lane, dsym_path=nil, api_key=nil, config_file=nil)
        #{dsym_path_env} \
        #{api_key_env} \
        #{config_file_env} \
+       #{override_env} \
        bundle exec fastlane #{lane}`
     end
   end

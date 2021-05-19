@@ -3,6 +3,7 @@ default_platform(:ios)
 endpoint = ENV['BUGSNAG_ENDPOINT']
 api_key = ENV['BUGSNAG_API_KEY']
 config_file = ENV['BUGSNAG_CONFIG_FILE']
+override = ENV['BUGSNAG_OVERRIDE']
 
 platform :ios do
   lane :send_build do
@@ -18,7 +19,7 @@ platform :ios do
   end
 
   lane :upload_symbols_with_api_key do
-    upload_symbols_to_bugsnag(upload_url: endpoint, api_key: api_key)
+    upload_symbols_to_bugsnag(upload_url: endpoint, api_key: api_key, override: override)
   end
 
   lane :upload_symbols_with_custom_action do

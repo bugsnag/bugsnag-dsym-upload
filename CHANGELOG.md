@@ -8,6 +8,9 @@
 * Files found with `Dir.glob` are now sorted alphabetically so that this action is deterministic accross OS's
   [#57](https://github.com/bugsnag/bugsnag-dsym-upload/pull/57)
 
+* Adds -o/--override option to allow users to permit missing DWARF files to be warnings instead of errors
+  [#TBD](TBD)
+
 ## 2.0.0 (2020-08-13)
 
 ### Changes

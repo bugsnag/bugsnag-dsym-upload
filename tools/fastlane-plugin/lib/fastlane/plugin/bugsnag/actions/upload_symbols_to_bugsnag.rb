@@ -23,7 +23,7 @@ module Fastlane
 
         parse_dsym_paths(params[:dsym_path]).each do |dsym_path|
           if dsym_path.end_with?(".zip") or File.directory?(dsym_path)
-            args = upload_args(dsym_path, params[:symbol_maps_path], params[:upload_url], params[:project_root], api_key, verbose)
+            args = upload_args(dsym_path, params[:symbol_maps_path], params[:upload_url], params[:project_root], api_key, verbose, params[:override])
             success = Kernel.system(UPLOAD_SCRIPT_PATH, *args)
             if success
               UI.success("Uploaded dSYMs in #{dsym_path}")
@@ -112,6 +112,12 @@ module Fastlane
                                        description: "Root path of the project",
                                        default_value: Dir::pwd,
                                        optional: true),
+          FastlaneCore::ConfigItem.new(key: :override,
+                                       env_name: "BUGSNAG_OVERRIDE",
+                                       description: "Allows dSYMs with missing DWARF data to be treate as warnings instead of errors",
+                                       optional: true,
+                                       default_value: false,
+                                       is_string: false),
           FastlaneCore::ConfigItem.new(key: :config_file,
                                        env_name: "BUGSNAG_CONFIG_FILE",
                                        description: "Info.plist location",
@@ -143,8 +149,9 @@ module Fastlane
         }
       end
 
-      def self.upload_args dir, symbol_maps_dir, upload_url, project_root, api_key, verbose
+      def self.upload_args dir, symbol_maps_dir, upload_url, project_root, api_key, verbose, override
         args = [verbose ? "--verbose" : "--silent"]
+        args += ["--override"] if override
         args += ["--api-key", api_key] unless api_key.nil?
         args += ["--upload-server", upload_url] unless upload_url.nil?
         args += ["--symbol-maps", symbol_maps_dir] unless symbol_maps_dir.nil?

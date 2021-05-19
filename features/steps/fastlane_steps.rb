@@ -21,6 +21,10 @@ When("I run lane {string} with dsym_path set to {string}, api_key set to {string
   fastlane_upload_symbols(lane, dsym_path, api_key, config_file)
 end
 
+When("I run lane {string} with dsym_path set to {string}, api_key set to {string} and override set to {string}") do |lane, dsym_path, api_key, override|
+  fastlane_upload_symbols(lane, dsym_path, api_key, nil, override)
+end
+
 Then("the exit status should be {int}") do |int|
   assert_equal(int, $?.exitstatus)
 end

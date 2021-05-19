@@ -75,12 +75,17 @@ Feature: Uploading dSYMs to Bugsnag using Fastlane
         And the field "apiKey" for multipart request 3 equals "1234567890ABCDEF1234567890ABCDEF"
         Then the exit status should be 0
 
-    Scenario: Skipping over a zero byte dSYM with warning
-        When I run lane "upload_symbols" with dsym_path set to "ZeroByteDsym/"
+    Scenario: Skipping over a zero byte dSYM file with warning
+        When I run lane "upload_symbols_with_api_key" with dsym_path set to "ZeroByteDsym/" and api_key set to "1234567890ABCDEF1234567890ABCDEF"
         Then I should receive 0 requests
         Then the exit status should be 0
 
     Scenario: Throw failure if dSYM is missing DWARF data
-        When I run lane "upload_symbols" with dsym_path set to "MissingDWARFdSYM/"
+        When I run lane "upload_symbols_with_api_key" with dsym_path set to "MissingDWARFdSYM/" and api_key set to "1234567890ABCDEF1234567890ABCDEF"
         Then I should receive 0 requests
         Then the exit status should be 1
+
+    Scenario: Throw warning if dSYM is missing DWARF data, with --override flag enabled
+        When I run lane "upload_symbols_with_api_key" with dsym_path set to "MissingDWARFdSYM/", api_key set to "1234567890ABCDEF1234567890ABCDEF" and override set to "true"
+        Then I should receive 0 requests
+        Then the exit status should be 0
