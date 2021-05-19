@@ -120,8 +120,8 @@ success_count=0
 warning_count=0
 fail_count=0
 
-for dsym in $dsym_dir/*.dSYM; do
-    log_verbose "Preparing to upload $dsym"
+for dsym in $(find $dsym_dir -type d -name *.dSYM); do
+    log "Preparing to upload $dsym"
 
     # check if the .dSYM is a file. Throw a warning if detected as such; it should be a directory
     # This can happen due to a bug in Xcode: https://developer.apple.com/forums/thread/659187
