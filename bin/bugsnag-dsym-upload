@@ -139,8 +139,8 @@ for dsym in $(find $dsym_dir -type d -name "*.dSYM" ! -path "*/__MACOSX/*"); do
 
     dwarf_data=$dsym/Contents/Resources/DWARF
     if [[ ! -d $dwarf_data ]]; then
-        log_verbose "[ERROR] Skipping file missing DWARF data: $dsym"
-        fail_count=$((fail_count+1))
+        log_verbose "[WARNING] Skipping file missing DWARF data: $dsym"
+        warning_count=$((warning_count+1))
         continue
     fi
     for file in $dwarf_data/*; do
