@@ -13,20 +13,22 @@
 function print_usage() {
     echo "Usage: $0 [--symbol-maps DIR] dSYMS_PATH"
     echo
-    echo "-h, --help          Displays this message"
-    echo "-v, --verbose       Print verbose logging output during execution"
-    echo "-o, --override      Allows dSYMs with missing DWARF data to be treated"
-    echo "                    as warnings instead of errors"
-    echo "--api-key API_KEY   The API key of the project the dSYM should be applied to"
-    echo "--symbol-maps DIR   Path to a directory of bitcode symbol maps. The"
-    echo "                    dSYM files will be restored with symbols prior to"
-    echo "                    upload. Requires dsymutil."
-    echo "--upload-server URL The server receiving dSYM files. Set this value if"
-    echo "                    using an on-premise Bugsnag installation"
-    echo "--project-root DIR  The root directory of the project. This will help to"
-    echo "                    group error reports by project"
-    echo "dSYMS_PATH          A directory or .zip file containing *.dSYM bundles to"
-    echo "                    upload"
+    echo "-h, --help                 Displays this message"
+    echo "-v, --verbose              Print verbose logging output during execution"
+    echo "-m, --allow-missing-dwarf  Throw warnings instead of errors when a dSYM with missing"
+    echo "                           DWARF data is found"
+    echo "-e, --ignore-empty-dsym    Throw warnings instead of errors when a *.dSYM file is found"
+    echo "                           rather than the expected *.dSYM directory"
+    echo "--api-key API_KEY          The API key of the project the dSYM should be applied to"
+    echo "--symbol-maps DIR          Path to a directory of bitcode symbol maps. The"
+    echo "                           dSYM files will be restored with symbols prior to"
+    echo "                           upload. Requires dsymutil."
+    echo "--upload-server URL        The server receiving dSYM files. Set this value if"
+    echo "                           using an on-premise Bugsnag installation"
+    echo "--project-root DIR         The root directory of the project. This will help to"
+    echo "                           group error reports by project"
+    echo "dSYMS_PATH                 A directory or .zip file containing *.dSYM bundles to"
+    echo "                           upload"
 }
 
 function exit_with_usage() {
@@ -52,7 +54,8 @@ upload_server=https://upload.bugsnag.com
 unset symbol_maps
 unset dsym_dir
 unset verbose
-unset override
+unset ignore_empty_dsym
+unset allow_missing_dwarf
 unset silent
 unset project_root
 unset api_key
@@ -68,8 +71,11 @@ while [[ $# -gt 0 ]]; do
         -v|--verbose)
             verbose=1
             shift;;
-        -o|--override)
-            override=1
+        -m|--allow-missing-dwarf)
+            allow_missing_dwarf=1
+            shift;;
+        -e|--ignore-empty-dsym)
+            ignore_empty_dsym=1
             shift;;
         --symbol-maps)
             symbol_maps=$2
@@ -126,15 +132,21 @@ success_count=0
 warning_count=0
 fail_count=0
 
-for dsym in $(find $dsym_dir -type d -name "*.dSYM" ! -path "*/__MACOSX/*"); do
+# Find all files and directories matching *.dSYM, except those in dir __MAXCOSX generated when using macOS Archive Utility
+for dsym in $(find $dsym_dir -name "*.dSYM" ! -path "*/__MACOSX/*"); do
     log_verbose "Preparing to upload $dsym"
 
-    # check if the .dSYM is a file. Throw a warning if detected as such; it should be a directory
-    # This can happen due to a bug in Xcode: https://developer.apple.com/forums/thread/659187
+    # check if the .dSYM is a file. Throw an error (warning if --ignore-empty-dsym set) if detected as such;
+    # it should be a directory. This can happen due to a bug in Xcode: https://developer.apple.com/forums/thread/659187
     if [ -f $dsym ]; then
         dsym_size=$(wc -c < "$dsym" | xargs)
-        log_verbose "[WARNING] Skipping $dsym as it is a file ($dsym_size bytes), not a directory with DWARF data";
-        warning_count=$((warning_count+1))
+        if [[ $ignore_empty_dsym == 1 ]]; then
+            log "[WARNING] Skipping $dsym as it is a file ($dsym_size bytes), not a directory with DWARF data";
+            warning_count=$((warning_count+1))
+        else
+            log "[ERROR] Skipping $dsym as it is a file ($dsym_size bytes), not a directory with DWARF data";
+            fail_count=$((fail_count+1))
+        fi
         continue
     fi
 
@@ -145,11 +157,11 @@ for dsym in $(find $dsym_dir -type d -name "*.dSYM" ! -path "*/__MACOSX/*"); do
 
     dwarf_data=$dsym/Contents/Resources/DWARF
     if [[ ! -d $dwarf_data ]]; then
-        if [[ $override == 1 ]]; then
-            log_verbose "[WARNING] Skipping file missing DWARF data: $dsym"
+        if [[ $allow_missing_dwarf == 1 ]]; then
+            log "[WARNING] Skipping file missing DWARF data: $dsym"
             warning_count=$((warning_count+1))
         else
-            log_verbose "[ERROR] Skipping file missing DWARF data: $dsym"
+            log "[ERROR] Skipping file missing DWARF data: $dsym"
             fail_count=$((fail_count+1))
         fi
         continue
@@ -178,12 +190,12 @@ for dsym in $(find $dsym_dir -type d -name "*.dSYM" ! -path "*/__MACOSX/*"); do
                 success_count=$((success_count+1))
             else
                 fail_count=$((fail_count+1))
-                log_verbose "[ERROR] Failed to upload file: $file"
+                log "[ERROR] Failed to upload file: $file"
             fi
             echo $output | grep -v '^OK$'
             log
         else
-            log_verbose "[ERROR] Skipping file without UUID: $file"
+            log "[ERROR] Skipping file without UUID: $file"
             fail_count=$((fail_count+1))
         fi
     done
