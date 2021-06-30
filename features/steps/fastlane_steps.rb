@@ -29,7 +29,6 @@ When("I run lane {string} with dsym_path set to {string}, api_key set to {string
   fastlane_upload_symbols(lane, dsym_path, api_key, nil, nil, allow_missing_dwarf)
 end
 
-
 Then("the exit status should be {int}") do |int|
   assert_equal(int, $?.exitstatus)
 end
