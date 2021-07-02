@@ -25,8 +25,8 @@ When("I run lane {string} with dsym_path set to {string}, api_key set to {string
   fastlane_upload_symbols(lane, dsym_path, api_key, nil, ignore_empty_dsym, nil)
 end
 
-When("I run lane {string} with dsym_path set to {string}, api_key set to {string} and allow_missing_dwarf set to {string}") do |lane, dsym_path, api_key, allow_missing_dwarf|
-  fastlane_upload_symbols(lane, dsym_path, api_key, nil, nil, allow_missing_dwarf)
+When("I run lane {string} with dsym_path set to {string}, api_key set to {string} and ignore_missing_dwarf set to {string}") do |lane, dsym_path, api_key, ignore_missing_dwarf|
+  fastlane_upload_symbols(lane, dsym_path, api_key, nil, nil, ignore_missing_dwarf)
 end
 
 Then("the exit status should be {int}") do |int|

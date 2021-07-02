@@ -90,7 +90,7 @@ Feature: Uploading dSYMs to Bugsnag using Fastlane
         Then I should receive 0 requests
         Then the exit status should be 1
 
-    Scenario: Throw warning if dSYM is missing DWARF data, when --allow-missing-dwarf flag enabled
-        When I run lane "upload_symbols_with_api_key" with dsym_path set to "MissingDWARFdSYM/", api_key set to "1234567890ABCDEF1234567890ABCDEF" and allow_missing_dwarf set to "true"
+    Scenario: Throw warning if dSYM is missing DWARF data, when --ignore-missing-dwarf flag enabled
+        When I run lane "upload_symbols_with_api_key" with dsym_path set to "MissingDWARFdSYM/", api_key set to "1234567890ABCDEF1234567890ABCDEF" and ignore_missing_dwarf set to "true"
         Then I should receive 0 requests
         Then the exit status should be 0

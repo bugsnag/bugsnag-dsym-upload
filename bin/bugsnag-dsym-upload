@@ -15,10 +15,6 @@ function print_usage() {
     echo
     echo "-h, --help                 Displays this message"
     echo "-v, --verbose              Print verbose logging output during execution"
-    echo "-m, --allow-missing-dwarf  Throw warnings instead of errors when a dSYM with missing"
-    echo "                           DWARF data is found"
-    echo "-e, --ignore-empty-dsym    Throw warnings instead of errors when a *.dSYM file is found"
-    echo "                           rather than the expected *.dSYM directory"
     echo "--api-key API_KEY          The API key of the project the dSYM should be applied to"
     echo "--symbol-maps DIR          Path to a directory of bitcode symbol maps. The"
     echo "                           dSYM files will be restored with symbols prior to"
@@ -27,6 +23,10 @@ function print_usage() {
     echo "                           using an on-premise Bugsnag installation"
     echo "--project-root DIR         The root directory of the project. This will help to"
     echo "                           group error reports by project"
+    echo "--ignore-missing-dwarf     Throw warnings instead of errors when a dSYM with missing"
+    echo "                           DWARF data is found"
+    echo "--ignore-empty-dsym        Throw warnings instead of errors when a *.dSYM file is found"
+    echo "                           rather than the expected *.dSYM directory"
     echo "dSYMS_PATH                 A directory or .zip file containing *.dSYM bundles to"
     echo "                           upload"
 }
@@ -55,7 +55,7 @@ unset symbol_maps
 unset dsym_dir
 unset verbose
 unset ignore_empty_dsym
-unset allow_missing_dwarf
+unset ignore_missing_dwarf
 unset silent
 unset project_root
 unset api_key
@@ -71,8 +71,8 @@ while [[ $# -gt 0 ]]; do
         -v|--verbose)
             verbose=1
             shift;;
-        -m|--allow-missing-dwarf)
-            allow_missing_dwarf=1
+        -m|--ignore-missing-dwarf)
+            ignore_missing_dwarf=1
             shift;;
         -e|--ignore-empty-dsym)
             ignore_empty_dsym=1
@@ -157,7 +157,7 @@ for dsym in $(find $dsym_dir -name "*.dSYM" ! -path "*/__MACOSX/*"); do
 
     dwarf_data=$dsym/Contents/Resources/DWARF
     if [[ ! -d $dwarf_data ]]; then
-        if [[ $allow_missing_dwarf == 1 ]]; then
+        if [[ $ignore_missing_dwarf == 1 ]]; then
             log "[WARNING] Skipping file missing DWARF data: $dsym"
             warning_count=$((warning_count+1))
         else
