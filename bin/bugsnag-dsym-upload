@@ -71,10 +71,10 @@ while [[ $# -gt 0 ]]; do
         -v|--verbose)
             verbose=1
             shift;;
-        -m|--ignore-missing-dwarf)
+        --ignore-missing-dwarf)
             ignore_missing_dwarf=1
             shift;;
-        -e|--ignore-empty-dsym)
+        --ignore-empty-dsym)
             ignore_empty_dsym=1
             shift;;
         --symbol-maps)

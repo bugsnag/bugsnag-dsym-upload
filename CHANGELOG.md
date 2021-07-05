@@ -4,8 +4,8 @@
 
 * Switch to use `find` rather than `glob` to catch all dSYMs regardless of directory depth (for AppCenter dSYM bundle support)
 * Files found with `Dir.glob` are now sorted alphabetically so that this action is deterministic accross OS's
-* Adds -m/--ignore-missing-dwarf option to throw warnings instead of errors when a dSYM with missing DWARF data is found
-* Adds -e/--ignore-empty-dsym option to throw warnings instead of errors when a *.dSYM file is found rather than the expected *.dSYM directory"
+* Adds --ignore-missing-dwarf option to throw warnings instead of errors when a dSYM with missing DWARF data is found
+* Adds --ignore-empty-dsym option to throw warnings instead of errors when a *.dSYM file is found rather than the expected *.dSYM directory"
   [#TBD](TBD)
 
 ## 2.0.0 (2020-08-13)
