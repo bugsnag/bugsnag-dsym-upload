@@ -6,7 +6,7 @@
 * Files found with `Dir.glob` are now sorted alphabetically so that this action is deterministic accross OS's
 * Adds --ignore-missing-dwarf option to throw warnings instead of errors when a dSYM with missing DWARF data is found
 * Adds --ignore-empty-dsym option to throw warnings instead of errors when a *.dSYM file is found rather than the expected *.dSYM directory"
-  [#TBD](TBD)
+  [#60](https://github.com/bugsnag/bugsnag-dsym-upload/pull/60)
 
 ## 2.0.0 (2020-08-13)
 
