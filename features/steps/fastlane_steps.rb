@@ -20,3 +20,15 @@ end
 When("I run lane {string} with dsym_path set to {string}, api_key set to {string} and config_file set to {string}") do |lane, dsym_path, api_key, config_file|
   fastlane_upload_symbols(lane, dsym_path, api_key, config_file)
 end
+
+When("I run lane {string} with dsym_path set to {string}, api_key set to {string} and ignore_empty_dsym set to {string}") do |lane, dsym_path, api_key, ignore_empty_dsym|
+  fastlane_upload_symbols(lane, dsym_path, api_key, nil, ignore_empty_dsym, nil)
+end
+
+When("I run lane {string} with dsym_path set to {string}, api_key set to {string} and ignore_missing_dwarf set to {string}") do |lane, dsym_path, api_key, ignore_missing_dwarf|
+  fastlane_upload_symbols(lane, dsym_path, api_key, nil, nil, ignore_missing_dwarf)
+end
+
+Then("the exit status should be {int}") do |int|
+  assert_equal(int, $?.exitstatus)
+end

@@ -3,6 +3,8 @@ default_platform(:ios)
 endpoint = ENV['BUGSNAG_ENDPOINT']
 api_key = ENV['BUGSNAG_API_KEY']
 config_file = ENV['BUGSNAG_CONFIG_FILE']
+ignore_empty_dsym = ENV['BUGSNAG_IGNORE_EMPTY_DSYM']
+ignore_missing_dwarf = ENV['BUGSNAG_IGNORE_MISSING_DWARF']
 
 platform :ios do
   lane :send_build do
@@ -18,7 +20,7 @@ platform :ios do
   end
 
   lane :upload_symbols_with_api_key do
-    upload_symbols_to_bugsnag(upload_url: endpoint, api_key: api_key)
+    upload_symbols_to_bugsnag(upload_url: endpoint, api_key: api_key, ignore_empty_dsym: ignore_empty_dsym, ignore_missing_dwarf: ignore_missing_dwarf)
   end
 
   lane :upload_symbols_with_custom_action do

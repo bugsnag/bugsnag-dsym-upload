@@ -8,15 +8,18 @@
 
     bugsnag-dsym-upload [--verbose] [--api-key API_KEY]
                                     [--upload-server URL]
-                                    [--symbol-maps MAP_DIR] 
-                                    [--project-root DIR] dSYMS_PATH
+                                    [--symbol-maps MAP_DIR]
+                                    [--project-root DIR] 
+                                    [--ignore-missing-dwarf]
+                                    [--ignore-empty-dsym]
+                                    dSYMS_PATH
     bugsnag-dsym-upload --help
 
 =head1 DESCRIPTION
 
-Given a directory, bugsnag-dsym-upload uploads any *.dSYM bundles with the
-directory to the Bugsnag Upload API (https://upload.bugsnag.com). As a
-pre-upload step, bitcode symbol maps can be combined with dSYM files to ensure
+Given a directory, bugsnag-dsym-upload uploads any *.dSYM bundles within the
+directory, and recursive subdirectories to the Bugsnag Upload API (https://upload.bugsnag.com).
+As a pre-upload step, bitcode symbol maps can be combined with dSYM files to ensure
 symbols are sent for bitcode-enabled binaries.
 
 Given a ZIP archive containing .dSYM bundles, the archive is first inflated in a
@@ -81,6 +84,14 @@ Silence all script output aside from errors
 =item I<-v>, --verbose
 
 Print verbose logging output during execution
+
+=item --ignore-missing-dwarf
+
+Throw warnings instead of errors when a dSYM with missing DWARF data is found
+
+=item --ignore-empty-dsym
+
+Throw warnings instead of errors when a *.dSYM file is found rather than the expected *.dSYM directory
 
 =back
 

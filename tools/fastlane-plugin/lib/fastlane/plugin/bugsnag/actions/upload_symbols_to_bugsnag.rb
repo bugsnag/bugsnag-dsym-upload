@@ -23,7 +23,7 @@ module Fastlane
 
         parse_dsym_paths(params[:dsym_path]).each do |dsym_path|
           if dsym_path.end_with?(".zip") or File.directory?(dsym_path)
-            args = upload_args(dsym_path, params[:symbol_maps_path], params[:upload_url], params[:project_root], api_key, verbose)
+            args = upload_args(dsym_path, params[:symbol_maps_path], params[:upload_url], params[:project_root], api_key, verbose, params[:ignore_missing_dwarf], params[:ignore_empty_dsym])
             success = Kernel.system(UPLOAD_SCRIPT_PATH, *args)
             if success
               UI.success("Uploaded dSYMs in #{dsym_path}")
@@ -112,6 +112,18 @@ module Fastlane
                                        description: "Root path of the project",
                                        default_value: Dir::pwd,
                                        optional: true),
+          FastlaneCore::ConfigItem.new(key: :ignore_missing_dwarf,
+                                       env_name: "BUGSNAG_IGNORE_MISSING_DWARF",
+                                       description: "Throw warnings instead of errors when a dSYM with missing DWARF data is found",
+                                       optional: true,
+                                       default_value: false,
+                                       is_string: false),
+          FastlaneCore::ConfigItem.new(key: :ignore_empty_dsym,
+                                       env_name: "BUGSNAG_IGNORE_EMPTY_DSYM",
+                                       description: "Throw warnings instead of errors when a *.dSYM file is found rather than the expected *.dSYM directory",
+                                       optional: true,
+                                       default_value: false,
+                                       is_string: false),
           FastlaneCore::ConfigItem.new(key: :config_file,
                                        env_name: "BUGSNAG_CONFIG_FILE",
                                        description: "Info.plist location",
@@ -143,8 +155,10 @@ module Fastlane
         }
       end
 
-      def self.upload_args dir, symbol_maps_dir, upload_url, project_root, api_key, verbose
+      def self.upload_args dir, symbol_maps_dir, upload_url, project_root, api_key, verbose, ignore_missing_dwarf, ignore_empty_dsym
         args = [verbose ? "--verbose" : "--silent"]
+        args += ["--ignore-missing-dwarf"] if ignore_missing_dwarf
+        args += ["--ignore-empty-dsym"] if ignore_empty_dsym
         args += ["--api-key", api_key] unless api_key.nil?
         args += ["--upload-server", upload_url] unless upload_url.nil?
         args += ["--symbol-maps", symbol_maps_dir] unless symbol_maps_dir.nil?
