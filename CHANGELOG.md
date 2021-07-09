@@ -5,7 +5,7 @@
   * Fixes [#32](https://github.com/bugsnag/bugsnag-dsym-upload/issues/32)
 * Adds `--ignore-missing-dwarf` option to throw warnings instead of errors when a dSYM directory with missing DWARF data is found. 
   * To be used to acknowledge a dSYM with missing DWARF data, where an error would otherwise cause problems with a calling tool such as Fastlane.
-  * Anecdotally, .dSYM directories can be generated but don't contain DWARF data. This has been observed where a user is building a subset of all of the architrecutres for which a pre-built library was compiled for, rendering empty dSYM directories (with no DWARF data).
+  * Anecdotally, .dSYM directories can be generated but don't contain DWARF data. This has been observed where a user is building a subset of all of the architectures for which a pre-built library was compiled for, rendering empty dSYM directories (with no DWARF data).
 * Adds `--ignore-empty-dsym` option to throw warnings instead of errors when a *.dSYM file is found rather than the expected *.dSYM directory.
   * To be used to acknowledge that there are dSYM files without debug information as discussed [here](https://stackoverflow.com/questions/48174272/lldb-qt-missing-debug-info.), where errors would otherwise cause problems with a calling tool such as Fastlane. 
   * This situation may be unavoidable by the user building the app if they don't have control over how a binary they _use_ is built.
@@ -14,7 +14,7 @@
 
 ### Bug fixes
 
-* Files found with `Dir.glob` are now sorted alphabetically so that this action is deterministic accross OS's
+* Files found with `Dir.glob` are now sorted alphabetically so that this action is deterministic across OS's
   [#57](https://github.com/bugsnag/bugsnag-dsym-upload/pull/57)
 
 ## 2.0.0 (2020-08-13)
