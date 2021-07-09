@@ -3,7 +3,7 @@ all: test_unit
 PROJECT = bugsnag-dsym-upload
 VERSION = $(shell cat VERSION)
 BINDIR := '/usr/local/bin'
-MANDIR := '/usr/local/man'
+MANDIR := '/usr/local/share/man'
 INSTALLCMD := install -C
 INSTALLDIRCMD := install -d
 
