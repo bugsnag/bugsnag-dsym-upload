@@ -67,3 +67,10 @@ Feature: Uploading dSYMs to Bugsnag
         And the field "dsym" for multipart request 0 is not null
         And the field "dsym" for multipart request 1 is not null
         Then the exit status should be 0
+        
+    Scenario: Uploading an .xcarchive containing commas and special characters
+        When I upload dSYMS with options "" and dSYM path "features/fixtures/bugsnag-example 14-05-2021,,, 11.27éøœåñü#.xcarchive"
+        Then I should receive a request
+        And the HTTP version is "1.1" for request 0
+        And the field "dsym" for multipart request 0 is not null
+        Then the exit status should be 0

@@ -16,6 +16,8 @@
 
 * Files found with `Dir.glob` are now sorted alphabetically so that this action is deterministic across OS's
   [#57](https://github.com/bugsnag/bugsnag-dsym-upload/pull/57)
+* dSYMs with special characters in their path are now uploaded without failures
+  [#62](https://github.com/bugsnag/bugsnag-dsym-upload/pull/62)
 
 ## 2.0.0 (2020-08-13)
 
