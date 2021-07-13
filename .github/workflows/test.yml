@@ -42,7 +42,7 @@ jobs:
         bundle exec maze-runner features/*.feature
 
     - name: sanity checks (macOS only)
-      if: contains(matrix.os, 'macos')
+      if: ${{ always() }}
       run: |
         fastlane -v
         cd features/fixtures/fl-project
