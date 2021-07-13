@@ -27,13 +27,6 @@ jobs:
 
     - run: mkdir -p vendor/{fastlane-bundle,bundle}
 
-    - name: sanity checks (macOS only)
-      if: contains(matrix.os, 'macos')
-      run: |
-        fastlane -v
-        cd features/fixtures/fl-project
-        fastlane list
-
     - name: run specs
       run: |
         bundle config path vendor/fastlane-bundle
@@ -47,3 +40,10 @@ jobs:
         bundle config path vendor/bundle
         bundle install --gemfile=Gemfile
         bundle exec maze-runner features/*.feature
+
+    - name: sanity checks (macOS only)
+      if: contains(matrix.os, 'macos')
+      run: |
+        fastlane -v
+        cd features/fixtures/fl-project
+        fastlane list
