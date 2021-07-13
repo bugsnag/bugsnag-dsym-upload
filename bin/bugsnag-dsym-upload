@@ -13,18 +13,22 @@
 function print_usage() {
     echo "Usage: $0 [--symbol-maps DIR] dSYMS_PATH"
     echo
-    echo "-h, --help          Displays this message"
-    echo "-v, --verbose       Print verbose logging output during execution"
-    echo "--api-key API_KEY   The API key of the project the dSYM should be applied to"
-    echo "--symbol-maps DIR   Path to a directory of bitcode symbol maps. The"
-    echo "                    dSYM files will be restored with symbols prior to"
-    echo "                    upload. Requires dsymutil."
-    echo "--upload-server URL The server receiving dSYM files. Set this value if"
-    echo "                    using an on-premise Bugsnag installation"
-    echo "--project-root DIR  The root directory of the project. This will help to"
-    echo "                    group error reports by project"
-    echo "dSYMS_PATH          A directory or .zip file containing *.dSYM bundles to"
-    echo "                    upload"
+    echo "-h, --help                 Displays this message"
+    echo "-v, --verbose              Print verbose logging output during execution"
+    echo "--api-key API_KEY          The API key of the project the dSYM should be applied to"
+    echo "--symbol-maps DIR          Path to a directory of bitcode symbol maps. The"
+    echo "                           dSYM files will be restored with symbols prior to"
+    echo "                           upload. Requires dsymutil."
+    echo "--upload-server URL        The server receiving dSYM files. Set this value if"
+    echo "                           using an on-premise Bugsnag installation"
+    echo "--project-root DIR         The root directory of the project. This will help to"
+    echo "                           group error reports by project"
+    echo "--ignore-missing-dwarf     Throw warnings instead of errors when a dSYM with missing"
+    echo "                           DWARF data is found"
+    echo "--ignore-empty-dsym        Throw warnings instead of errors when a *.dSYM file is found"
+    echo "                           rather than the expected *.dSYM directory"
+    echo "dSYMS_PATH                 A directory or .zip file containing *.dSYM bundles to"
+    echo "                           upload"
 }
 
 function exit_with_usage() {
@@ -50,6 +54,8 @@ upload_server=https://upload.bugsnag.com
 unset symbol_maps
 unset dsym_dir
 unset verbose
+unset ignore_empty_dsym
+unset ignore_missing_dwarf
 unset silent
 unset project_root
 unset api_key
@@ -64,6 +70,12 @@ while [[ $# -gt 0 ]]; do
             shift;;
         -v|--verbose)
             verbose=1
+            shift;;
+        --ignore-missing-dwarf)
+            ignore_missing_dwarf=1
+            shift;;
+        --ignore-empty-dsym)
+            ignore_empty_dsym=1
             shift;;
         --symbol-maps)
             symbol_maps=$2
@@ -117,10 +129,26 @@ fi
 
 log_verbose "Uploading files to $upload_server"
 success_count=0
+warning_count=0
 fail_count=0
 
-for dsym in $dsym_dir/*.dSYM; do
+# Find all files and directories matching *.dSYM, except those in dir __MAXCOSX generated when using macOS Archive Utility
+for dsym in $(find $dsym_dir -name "*.dSYM" ! -path "*/__MACOSX/*"); do
     log_verbose "Preparing to upload $dsym"
+
+    # check if the .dSYM is a file. Throw an error (warning if --ignore-empty-dsym set) if detected as such;
+    # it should be a directory. This can happen due to a bug in Xcode: https://developer.apple.com/forums/thread/659187
+    if [ -f $dsym ]; then
+        dsym_size=$(wc -c < "$dsym" | xargs)
+        if [[ $ignore_empty_dsym == 1 ]]; then
+            log "[WARNING] Skipping $dsym as it is a file ($dsym_size bytes), not a directory with DWARF data";
+            warning_count=$((warning_count+1))
+        else
+            log "[ERROR] Skipping $dsym as it is a file ($dsym_size bytes), not a directory with DWARF data";
+            fail_count=$((fail_count+1))
+        fi
+        continue
+    fi
 
     if [[ -d $symbol_maps ]]; then
         log_verbose "Updating file with bitcode symbol maps in $symbol_maps"
@@ -129,8 +157,13 @@ for dsym in $dsym_dir/*.dSYM; do
 
     dwarf_data=$dsym/Contents/Resources/DWARF
     if [[ ! -d $dwarf_data ]]; then
-        log_verbose "Skipping file missing DWARF data: $dsym"
-        fail_count=$((fail_count+1))
+        if [[ $ignore_missing_dwarf == 1 ]]; then
+            log "[WARNING] Skipping file missing DWARF data: $dsym"
+            warning_count=$((warning_count+1))
+        else
+            log "[ERROR] Skipping file missing DWARF data: $dsym"
+            fail_count=$((fail_count+1))
+        fi
         continue
     fi
     for file in $dwarf_data/*; do
@@ -150,29 +183,40 @@ for dsym in $dsym_dir/*.dSYM; do
 
             # We need to shell out to perform the curl as there seems to be some indirect
             # wrapping of this script which causes the command to fail if called directly.
-            curl_cmd="curl --fail --silent --show-error --http1.1 $upload_server -F dsym=@\"$file\" $args"
+            curl_cmd="curl --fail --silent --show-error --http1.1 $upload_server -F 'dsym=@\"$file\"' $args"
             output=$(sh -c "$curl_cmd")
 
             if [ $? -eq 0 ] && [ "$output" != "invalid apiKey" ]; then
                 success_count=$((success_count+1))
             else
                 fail_count=$((fail_count+1))
-                log_verbose "Failed to upload file: $file"
+                log "[ERROR] Failed to upload file: $file"
             fi
             echo $output | grep -v '^OK$'
             log
         else
-            log_verbose "Skipping file without UUID: $file"
+            log "[ERROR] Skipping file without UUID: $file"
             fail_count=$((fail_count+1))
         fi
     done
 done
 
+exit_code=0
 if [ $success_count -gt 0 ]; then
-    log "$success_count files uploaded successfully"
+    log "$success_count file(s) uploaded successfully"
+fi
+
+if [ $warning_count -gt 0 ]; then
+    log "$warning_count file(s) failed to upload with warnings"
 fi
 
 if [ $fail_count -gt 0 ]; then
-    log "$fail_count files failed to upload"
-    exit 1
+    exit_code=1
+    log "$fail_count file(s) failed to upload with errors"
 fi
+
+if [[ $fail_count -gt 0 || $warning_count -gt 0 ]] && [[ $verbose != 1 ]]; then
+    log "Re-run the bugsnag-dsym-upload tool with the --verbose option for more information"
+fi
+
+exit $exit_code

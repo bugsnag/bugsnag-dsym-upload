@@ -23,17 +23,16 @@ Open the `tools/fastlane-plugin` directory, then:
 ## Releasing a new version
 
 1. Update the CHANGELOG with new content
-2. Update the version number
-   * Homebrew:
-      * Create a new Pull Request on the Bugsnag Homebrew tap repo `bugsnag/homebrew-bugsnag-tap` and update `Formula/bugsnag-dsym-upload.rb` with the following:
-      * Update the `url` in the formula to the new `.tar.gz` release
-      * Update the `sha256` checksum value in the formula. You can get this by creating a new formula with `brew create <link_to_new_.tar.gz>`
+2. Update the version numbers:
    * Update the version in `VERSION`
-   * Update the version in
-     `tools/fastlane-plugin/lib/fastlane/plugin/bugsnag/version.rb`
+   * Update the version in `tools/fastlane-plugin/lib/fastlane/plugin/bugsnag/version.rb`
 3. Commit your changes
 4. Tag the release
-5. Push
+5. Push:
    * Create a new GitHub release with the changes
    * Open `tools/fastlane-plugin` and run `rake release`
-6. Update the documentation as needed on docs.bugsnag.com
+6. Homebrew:
+   * Create a new Pull Request on the Bugsnag Homebrew tap repo `bugsnag/homebrew-tap` and update `Formula/bugsnag-dsym-upload.rb` with the following:
+   * Update the `url` in the formula to the new `.tar.gz` release
+   * Update the `sha256` checksum value in the formula. You can get this by creating a new formula with `brew create <link_to_new_.tar.gz>`
+7. Update the documentation as needed on docs.bugsnag.com

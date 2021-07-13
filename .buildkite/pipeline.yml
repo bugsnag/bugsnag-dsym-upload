@@ -1,0 +1,6 @@
+steps:
+  - name: ':copyright: License Audit'
+    plugins:
+      docker-compose#v3.7.0:
+        run: license_finder
+    command: /bin/bash -lc '/scan/scripts/license_finder.sh'

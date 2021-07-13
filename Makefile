@@ -3,7 +3,7 @@ all: test_unit
 PROJECT = bugsnag-dsym-upload
 VERSION = $(shell cat VERSION)
 BINDIR := '/usr/local/bin'
-MANDIR := '/usr/local/man'
+MANDIR := '/usr/local/share/man'
 INSTALLCMD := install -C
 INSTALLDIRCMD := install -d
 
@@ -28,7 +28,7 @@ bootstrap:
 	@cd tools/fastlane-plugin && bundle install
 
 test_unit:
-	@cd tools/fastlane-plugin && bundle exec rake spec
+	@cd tools/fastlane-plugin && bundle exec rspec
 
 test_features:
 	@bundle exec maze-runner -c features/*.feature
