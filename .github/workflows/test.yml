@@ -27,6 +27,13 @@ jobs:
 
     - run: mkdir -p vendor/{fastlane-bundle,bundle}
 
+    - name: sanity checks (macOS only)
+      if: contains(matrix.os, 'macos')
+      run: |
+        fastlane -v
+        cd features/fixtures/fl-project
+        fastlane list
+
     - name: run specs
       run: |
         bundle config path vendor/fastlane-bundle
