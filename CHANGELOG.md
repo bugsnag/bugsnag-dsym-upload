@@ -1,4 +1,4 @@
-## TBC (TBC)
+## 2.1.0 (2021-07-13)
 
 ### Enhancements
 * Switch to use `find` rather than `glob` to catch all dSYMs regardless of directory depth (for AppCenter dSYM bundle support)
