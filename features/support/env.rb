@@ -5,11 +5,13 @@ Bundler.with_clean_env do
 end
 
 Bundler.with_clean_env do
+  version = `cat VERSION`.chomp
   Dir.chdir 'features/fixtures/fl-project' do
-    gem_path = Dir['../../../tools/fastlane-plugin/fastlane-plugin-bugsnag-*.gem'].last
+    gem_path = Dir["../../../tools/fastlane-plugin/fastlane-plugin-bugsnag-#{version}.gem"].last
     `bundle config --local path vendor`
     `bundle install --gemfile=Gemfile`
     `bundle exec gem install #{gem_path}`
+    `bundle update fastlane-plugin-bugsnag --local --gemfile=Gemfile` # use just-built gem
   end
 end
 
