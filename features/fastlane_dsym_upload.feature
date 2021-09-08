@@ -62,8 +62,8 @@ Feature: Uploading dSYMs to Bugsnag using Fastlane
         And the field "apiKey" for multipart request 1 equals "1234567890ABCDEF1234567890ABCDEF"
         Then the exit status should be 0
 
-    Scenario: Uploading dSYMs using shared values from other plugins
-        When I run lane "upload_symbols_with_custom_action" with api_key set to "1234567890ABCDEF1234567890ABCDEF"
+    Scenario: Uploading dSYMs after running `gym` Fastlane action
+        When I run lane "upload_symbols_after_gym" with api_key set to "1234567890ABCDEF1234567890ABCDEF"
         Then I should receive 4 request
         And the field "dsym" for multipart request 0 is not null
         And the field "apiKey" for multipart request 0 equals "1234567890ABCDEF1234567890ABCDEF"
@@ -73,6 +73,34 @@ Feature: Uploading dSYMs to Bugsnag using Fastlane
         And the field "apiKey" for multipart request 2 equals "1234567890ABCDEF1234567890ABCDEF"
         And the field "dsym" for multipart request 3 is not null
         And the field "apiKey" for multipart request 3 equals "1234567890ABCDEF1234567890ABCDEF"
+        Then the exit status should be 0
+    
+    Scenario: Uploading dSYMs after running `download_dsyms` Fastlane action
+        When I run lane "upload_symbols_after_download_dsyms" with api_key set to "1234567890ABCDEF1234567890ABCDEF"
+        Then I should receive 4 request
+        And the field "dsym" for multipart request 0 is not null
+        And the field "apiKey" for multipart request 0 equals "1234567890ABCDEF1234567890ABCDEF"
+        And the field "dsym" for multipart request 1 is not null
+        And the field "apiKey" for multipart request 1 equals "1234567890ABCDEF1234567890ABCDEF"
+        And the field "dsym" for multipart request 2 is not null
+        And the field "apiKey" for multipart request 2 equals "1234567890ABCDEF1234567890ABCDEF"
+        And the field "dsym" for multipart request 3 is not null
+        And the field "apiKey" for multipart request 3 equals "1234567890ABCDEF1234567890ABCDEF"
+        Then the exit status should be 0
+
+    Scenario: Uploading dSYMs after running `gym` and  `download_dsyms` Fastlane actions
+        When I run lane "upload_symbols_after_gym_and_download_dsyms" with api_key set to "1234567890ABCDEF1234567890ABCDEF"
+        Then I should receive 5 request
+        And the field "dsym" for multipart request 0 is not null
+        And the field "apiKey" for multipart request 0 equals "1234567890ABCDEF1234567890ABCDEF"
+        And the field "dsym" for multipart request 1 is not null
+        And the field "apiKey" for multipart request 1 equals "1234567890ABCDEF1234567890ABCDEF"
+        And the field "dsym" for multipart request 2 is not null
+        And the field "apiKey" for multipart request 2 equals "1234567890ABCDEF1234567890ABCDEF"
+        And the field "dsym" for multipart request 3 is not null
+        And the field "apiKey" for multipart request 3 equals "1234567890ABCDEF1234567890ABCDEF"
+        And the field "dsym" for multipart request 4 is not null
+        And the field "apiKey" for multipart request 4 equals "1234567890ABCDEF1234567890ABCDEF"
         Then the exit status should be 0
 
     Scenario: Skipping over a zero byte dSYM file with Error
