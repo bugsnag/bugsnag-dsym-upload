@@ -181,7 +181,7 @@ module Fastlane
       # https://docs.fastlane.tools/actions/gym/#lane-variables
       def self.gym_dsyms?
         if defined?(SharedValues::DSYM_PATHS)
-          if Actions.lane_context.key?(SharedValues::DSYM_PATHS)
+          if Actions.lane_context[SharedValues::DSYM_PATHS]
             true
           end
         end
@@ -191,7 +191,7 @@ module Fastlane
       # https://docs.fastlane.tools/actions/download_dsyms/#lane-variables
       def self.download_dsym_dsyms?
         if defined?(SharedValues::DSYM_OUTPUT_PATH)
-          if Actions.lane_context.key?(SharedValues::DSYM_OUTPUT_PATH)
+          if Actions.lane_context[SharedValues::DSYM_OUTPUT_PATH]
             true
           end
         end
