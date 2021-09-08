@@ -17,9 +17,12 @@ module Fastlane
         # If verbose flag is enabled (`--verbose`), display the plugin action debug info
         # Store the verbose flag for use in the upload arguments.
         verbose = UI.verbose("Uploading dSYMs to Bugsnag with the following parameters:")
+        rjust = 30 # set justification width for keys for the list of parameters to output
         params.values.each do |param|
-          UI.verbose("  #{param[0].to_s.rjust(18)}: #{param[1]}")
+          UI.verbose("  #{param[0].to_s.rjust(rjust)}: #{param[1]}")
         end
+        UI.verbose("  #{"SharedValues::DSYM_PATHS".to_s.rjust(rjust)}: #{gym_dsyms? ? Actions.lane_context[SharedValues::DSYM_PATHS] : "not set"}")
+        UI.verbose("  #{"SharedValues::DSYM_OUTPUT_PATH".to_s.rjust(rjust)}: #{download_dsym_dsyms? ? Actions.lane_context[SharedValues::DSYM_OUTPUT_PATH] : "not set"}")
 
         parse_dsym_paths(params[:dsym_path]).each do |dsym_path|
           if dsym_path.end_with?(".zip") or File.directory?(dsym_path)
@@ -41,7 +44,7 @@ module Fastlane
       end
 
       def self.authors
-        ["kattrali"]
+        ["kattrali", "xander-jones"]
       end
 
       def self.return_value
@@ -92,8 +95,8 @@ module Fastlane
           FastlaneCore::ConfigItem.new(key: :dsym_path,
                                        type: Array,
                                        env_name: "BUGSNAG_DSYM_PATH",
-                                       description: "Path to the DSYM directory, file, or zip to upload",
-                                       default_value: default_dsym_path,
+                                       description: "Path to the dSYM directory, file, or zip to upload",
+                                       default_value: default_dsym_paths,
                                        optional: true,
                                        verify_block: validate_dsym_path),
           FastlaneCore::ConfigItem.new(key: :upload_url,
@@ -174,12 +177,32 @@ module Fastlane
         end.uniq
       end
 
-      def self.default_dsym_path
-        path = Dir["./**/*.dSYM.zip"] + Dir["./**/*.dSYM"]
-        dsym_paths = Actions.lane_context[SharedValues::DSYM_PATHS] if defined? SharedValues::DSYM_PATHS
-        dsyms_output_path = Actions.lane_context[SharedValues::DSYM_OUTPUT_PATH] if defined? SharedValues::DSYM_OUTPUT_PATH
-        default_value = dsyms_output_path || dsym_paths || path
-        parse_dsym_paths(default_value)
+      # returns true if `gym` created some dSYMs for us to upload
+      # https://docs.fastlane.tools/actions/gym/#lane-variables
+      def self.gym_dsyms?
+        if defined?(SharedValues::DSYM_PATHS)
+          if Actions.lane_context.key?(SharedValues::DSYM_PATHS)
+            true
+          end
+        end
+      end
+
+      # returns true if `download_dsyms` created some dSYMs for us to upload
+      # https://docs.fastlane.tools/actions/download_dsyms/#lane-variables
+      def self.download_dsym_dsyms?
+        if defined?(SharedValues::DSYM_OUTPUT_PATH)
+          if Actions.lane_context.key?(SharedValues::DSYM_OUTPUT_PATH)
+            true
+          end
+        end
+      end
+
+      def self.default_dsym_paths
+        vendor_regex = %r{\.\/vendor.*}
+        paths = Dir["./**/*.dSYM.zip"].reject{|f| f[vendor_regex] } + Dir["./**/*.dSYM"].reject{|f| f[vendor_regex] } # scrape the sub directories for zips and dSYMs
+        paths += Actions.lane_context[SharedValues::DSYM_PATHS] if gym_dsyms?                      # set by `download_dsyms` Fastlane action
+        paths += Actions.lane_context[SharedValues::DSYM_OUTPUT_PATH] if download_dsym_dsyms?      # set by `gym` Fastlane action
+        parse_dsym_paths(paths)
       end
     end
   end
