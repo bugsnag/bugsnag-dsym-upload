@@ -170,7 +170,7 @@ module Fastlane
         args
       end
 
-      # returns an array of unique dSYM paths to the dSYMs to upload
+      # returns an array of unique dSYM-containing directory paths to upload
       def self.parse_dsym_paths dsym_path
         dsym_path.compact.map do |path|
           path.end_with?(".dSYM") ? File.dirname(path) : path
