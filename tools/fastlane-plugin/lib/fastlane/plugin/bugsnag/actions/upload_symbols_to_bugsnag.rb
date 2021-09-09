@@ -170,11 +170,16 @@ module Fastlane
         args
       end
 
+      # returns an array of unique dSYM paths to the dSYMs to upload
       def self.parse_dsym_paths dsym_path
-        dsym_paths = dsym_path.is_a?(Array) ? dsym_path : [dsym_path]
-        dsym_paths.compact.map do |path|
+        dsym_path.compact.map do |path|
           path.end_with?(".dSYM") ? File.dirname(path) : path
         end.uniq
+      end
+
+      # if input is an Array, return that array, else coerce the input into an array
+      def self.coerce_array dsym_path
+        dsym_path.is_a?(Array) ? dsym_path : [dsym_path]
       end
 
       # returns true if `gym` created some dSYMs for us to upload
@@ -200,9 +205,9 @@ module Fastlane
       def self.default_dsym_paths
         vendor_regex = %r{\.\/vendor.*}
         paths = Dir["./**/*.dSYM.zip"].reject{|f| f[vendor_regex] } + Dir["./**/*.dSYM"].reject{|f| f[vendor_regex] } # scrape the sub directories for zips and dSYMs
-        paths += Actions.lane_context[SharedValues::DSYM_PATHS] if gym_dsyms?                      # set by `download_dsyms` Fastlane action
-        paths += Actions.lane_context[SharedValues::DSYM_OUTPUT_PATH] if download_dsym_dsyms?      # set by `gym` Fastlane action
-        parse_dsym_paths(paths)
+        paths += coerce_array(Actions.lane_context[SharedValues::DSYM_PATHS]) if gym_dsyms?                      # set by `download_dsyms` Fastlane action
+        paths += coerce_array(Actions.lane_context[SharedValues::DSYM_OUTPUT_PATH]) if download_dsym_dsyms?      # set by `gym` Fastlane action
+        parse_dsym_paths(paths.uniq)
       end
     end
   end
