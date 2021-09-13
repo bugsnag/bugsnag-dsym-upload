@@ -1,10 +1,10 @@
-Bundler.with_clean_env do
+Bundler.with_unbundled_env do
   Dir.chdir 'tools/fastlane-plugin' do
     `rake build`
   end
 end
 
-Bundler.with_clean_env do
+Bundler.with_unbundled_env do
   version = `cat VERSION`.chomp
   Dir.chdir 'features/fixtures/fl-project' do
     gem_path = Dir["../../../tools/fastlane-plugin/fastlane-plugin-bugsnag-#{version}.gem"].last
@@ -22,7 +22,7 @@ def fastlane_upload_symbols(lane, dsym_path=nil, api_key=nil, config_file=nil, i
   ignore_empty_dsym_env = "BUGSNAG_IGNORE_EMPTY_DSYM='#{ignore_empty_dsym}'" unless ignore_empty_dsym.nil?
   ignore_missing_dwarf_env = "BUGSNAG_IGNORE_MISSING_DWARF='#{ignore_missing_dwarf}'" unless ignore_missing_dwarf.nil?
 
-  Bundler.with_clean_env do
+  Bundler.with_unbundled_env do
     Dir.chdir 'features/fixtures/fl-project' do
       `BUGSNAG_ENDPOINT='http://localhost:#{MOCK_API_PORT}'\
        #{dsym_path_env} \
