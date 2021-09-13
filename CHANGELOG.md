@@ -1,3 +1,11 @@
+## 2.2.0 (14-09-2021)
+
+### Enhancements
+* Upload all dSYMs found in searched paths, dSYMs returned from `gym` action, and dSYMs returned from `download_dsyms` action. Previously if one or both of these actions ran, their shared value would override one another. 
+  * Fixes [#66](https://github.com/bugsnag/bugsnag-dsym-upload/issues/66), and
+  * fixes [#51](https://github.com/bugsnag/bugsnag-dsym-upload/issues/51)
+  [#67](https://github.com/bugsnag/bugsnag-dsym-upload/pull/67)
+
 ## 2.1.0 (2021-07-13)
 
 ### Enhancements
