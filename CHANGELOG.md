@@ -1,3 +1,9 @@
+## 2.2.1 (19-01-2022)
+
+### Bug fixes
+* Fix output locations of Fastlane actions: `gym` produces `SharedValues::DSYM_OUTPUT_PATH` `download_dsyms` produces `SharedValues::DSYM_PATHS`
+  [#72](https://github.com/bugsnag/bugsnag-dsym-upload/pull/72)
+
 ## 2.2.0 (14-09-2021)
 
 ### Enhancements
