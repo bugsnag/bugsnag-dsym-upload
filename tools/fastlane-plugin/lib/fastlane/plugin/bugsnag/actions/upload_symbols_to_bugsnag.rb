@@ -185,8 +185,8 @@ module Fastlane
       # returns true if `gym` created some dSYMs for us to upload
       # https://docs.fastlane.tools/actions/gym/#lane-variables
       def self.gym_dsyms?
-        if defined?(SharedValues::DSYM_PATHS)
-          if Actions.lane_context[SharedValues::DSYM_PATHS]
+        if defined?(SharedValues::DSYM_OUTPUT_PATH)
+          if Actions.lane_context[SharedValues::DSYM_OUTPUT_PATH]
             true
           end
         end
@@ -195,8 +195,8 @@ module Fastlane
       # returns true if `download_dsyms` created some dSYMs for us to upload
       # https://docs.fastlane.tools/actions/download_dsyms/#lane-variables
       def self.download_dsym_dsyms?
-        if defined?(SharedValues::DSYM_OUTPUT_PATH)
-          if Actions.lane_context[SharedValues::DSYM_OUTPUT_PATH]
+        if defined?(SharedValues::DSYM_PATHS)
+          if Actions.lane_context[SharedValues::DSYM_PATHS]
             true
           end
         end
@@ -205,8 +205,8 @@ module Fastlane
       def self.default_dsym_paths
         vendor_regex = %r{\.\/vendor.*}
         paths = Dir["./**/*.dSYM.zip"].reject{|f| f[vendor_regex] } + Dir["./**/*.dSYM"].reject{|f| f[vendor_regex] } # scrape the sub directories for zips and dSYMs
-        paths += coerce_array(Actions.lane_context[SharedValues::DSYM_PATHS]) if gym_dsyms?                      # set by `download_dsyms` Fastlane action
-        paths += coerce_array(Actions.lane_context[SharedValues::DSYM_OUTPUT_PATH]) if download_dsym_dsyms?      # set by `gym` Fastlane action
+        paths += coerce_array(Actions.lane_context[SharedValues::DSYM_OUTPUT_PATH]) if gym_dsyms?                     # set by `gym` Fastlane action
+        paths += coerce_array(Actions.lane_context[SharedValues::DSYM_PATHS]) if download_dsym_dsyms?                 # set by `download_dsyms` Fastlane action
         parse_dsym_paths(paths.uniq)
       end
     end
