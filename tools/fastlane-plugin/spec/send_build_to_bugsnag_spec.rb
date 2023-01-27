@@ -121,5 +121,41 @@ describe BuildAction do
         end
       end
     end
+
+    context 'metadata added to payload' do
+      it "single key:value pair added" do
+        expect(BuildAction).to receive(:send_notification) do |url, body|
+          payload = ::JSON.load(body)
+          expect(payload['appVersion']).to eq '4.0-project'
+          expect(payload['apiKey']).to eq '12345678901234567890123456789DDD'
+          expect(payload['metadata']).to eq '"test1": "First test"'
+        end
+
+        Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
+          run_with({
+            app_version: '4.0-project',
+            api_key: '12345678901234567890123456789DDD',
+            metadata: '"test1": "First test"'
+          })
+        end
+      end
+      
+      it "multiple key:value pairs added" do
+        expect(BuildAction).to receive(:send_notification) do |url, body|
+          payload = ::JSON.load(body)
+          expect(payload['appVersion']).to eq '4.0-project'
+          expect(payload['apiKey']).to eq '12345678901234567890123456789DDD'
+          expect(payload['metadata']).to eq '"test1": "First test", "test2": "Second test", "test3": "Third test"'
+        end
+
+        Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
+          run_with({
+            app_version: '4.0-project',
+            api_key: '12345678901234567890123456789DDD',
+            metadata: '"test1": "First test", "test2": "Second test", "test3": "Third test"'
+          })
+        end
+      end
+    end
   end
 end

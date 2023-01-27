@@ -38,6 +38,9 @@ module Fastlane
         payload[:sourceControl][:repository] = params[:repository] if params[:repository]
         payload[:sourceControl][:provider] = params[:provider] if params[:provider]
 
+        # If provided apply metadata to payload.
+        payload[:metadata] = params[:metadata]
+
         payload.reject! {|k,v| v == nil || (v.is_a?(Hash) && v.empty?)}
 
         if payload[:apiKey].nil? || !payload[:apiKey].is_a?(String)
@@ -167,7 +170,12 @@ module Fastlane
           FastlaneCore::ConfigItem.new(key: :endpoint,
                                        description: "Bugsnag deployment endpoint",
                                        optional: true,
-                                       default_value: "https://build.bugsnag.com")
+                                       default_value: "https://build.bugsnag.com"),
+          FastlaneCore::ConfigItem.new(key: :metadata,
+                                       description: "Metadata",
+                                       optional:true,
+                                       type: Object, 
+                                       default_value: nil)
         ]
       end
 
@@ -319,7 +327,7 @@ module Fastlane
           nil
         end
       end
-
+      
       def self.send_notification(url, body)
         require "net/http"
         uri = URI.parse(url)
