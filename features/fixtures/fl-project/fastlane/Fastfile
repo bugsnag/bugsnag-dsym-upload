@@ -5,10 +5,21 @@ api_key = ENV['BUGSNAG_API_KEY']
 config_file = ENV['BUGSNAG_CONFIG_FILE']
 ignore_empty_dsym = ENV['BUGSNAG_IGNORE_EMPTY_DSYM']
 ignore_missing_dwarf = ENV['BUGSNAG_IGNORE_MISSING_DWARF']
+# Build reporting exclusive
+app_version = ENV['BUGSNAG_APP_VERSION']
+android_version_code = ENV['BUGSNAG_ANDROID_VERSION_CODE']
+ios_bundle_version = ENV['BUGSNAG_IOS_BUNDLE_VERSION']
+release_stage = ENV["BUGSNAG_RELEASE_STAGE"]
+builder_name = ENV["BUGSNAG_BUILDER_NAME"]
+repository = ENV["BUGSNAG_REPOSITORY"]
+revision = ENV["BUGSNAG_REVISION"]
+provider = ENV["BUGSNAG_PROVIDER"]
+metadata = ENV['BUGSNAG_BUILD_METADATA']
 
 platform :ios do
+  # Report used for all build tests
   lane :send_build do
-    send_build_to_bugsnag(upload_url: endpoint, api_key: api_key)
+    send_build_to_bugsnag(endpoint: endpoint, api_key: api_key, app_version: app_version, android_version_code: android_version_code, ios_bundle_version: ios_bundle_version, release_stage: release_stage, builder: builder_name, repository: repository, revision: revision, provider: provider, metadata: metadata)
   end
 
   lane :upload_symbols do
@@ -40,7 +51,6 @@ platform :ios do
     Actions.lane_context[SharedValues::DSYM_PATHS] = ["../bugsnag-example 14-05-2021,,, 11.27éøœåñü#.xcarchive/dSYMs"]
     upload_symbols_to_bugsnag(upload_url: endpoint, api_key: api_key, ignore_empty_dsym: true, ignore_missing_dwarf: true)
   end
-
 end
 
 

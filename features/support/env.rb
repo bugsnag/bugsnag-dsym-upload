@@ -34,3 +34,34 @@ def fastlane_upload_symbols(lane, dsym_path=nil, api_key=nil, config_file=nil, i
     end
   end
 end
+
+# Non active params automatically set to nil. No need to set manually here.
+def fastlane_report_build(lane, api_key, app_version, android_version_code, ios_bundle_version, release_stage, builder_name, repository, revision, provider, metadata)
+  api_key_env = "BUGSNAG_API_KEY='#{api_key}'" unless api_key.nil?
+  app_version_env = "BUGSNAG_APP_VERSION='#{app_version}'" unless app_version.nil?
+  android_version_code_env = "BUGSNAG_ANDROID_VERSION_CODE='#{android_version_code}'" unless android_version_code.nil?
+  ios_bundle_version_env = "BUGSNAG_IOS_BUNDLE_VERSION='#{ios_bundle_version}'" unless ios_bundle_version.nil?
+  release_stage_env = "BUGSNAG_RELEASE_STAGE='#{release_stage}'" unless release_stage.nil?
+  builder_name_env = "BUGSNAG_BUILDER_NAME='#{builder_name}'" unless builder_name.nil?
+  repository_env = "BUGSNAG_REPOSITORY='#{repository}'" unless repository.nil?
+  revision_env = "BUGSNAG_REVISION='#{revision}'" unless revision.nil?
+  provider_env = "BUGSNAG_PROVIDER='#{provider}'" unless provider.nil?
+  metadata_env = "BUGSNAG_BUILD_METADATA='#{metadata}'" unless app_version.nil?
+
+  Bundler.with_unbundled_env do
+    Dir.chdir 'features/fixtures/fl-project' do
+      `BUGSNAG_ENDPOINT='http://localhost:#{MOCK_API_PORT}'\
+      #{api_key_env} \
+      #{app_version_env} \
+      #{android_version_code_env} \
+      #{ios_bundle_version_env} \
+      #{release_stage_env} \
+      #{builder_name_env} \
+      #{repository_env} \
+      #{revision_env} \
+      #{provider_env} \
+      #{metadata_env} \
+      bundle exec fastlane #{lane}`
+    end
+  end
+end
