@@ -1,5 +1,6 @@
 require "xmlsimple"
 require "json"
+require_relative "find_info_plist_path"
 
 module Fastlane
   module Actions
@@ -196,7 +197,7 @@ module Fastlane
         when nil
           if file_path = default_android_manifest_path
             return file_path
-          elsif file_path = default_info_plist_path
+          elsif file_path = FindInfoPlist.default_info_plist_path
             return file_path
           end
         when :android
@@ -204,7 +205,7 @@ module Fastlane
             return file_path
           end
         else
-          if file_path = default_info_plist_path
+          if file_path = FindInfoPlist.default_info_plist_path
             return file_path
           end
         end
@@ -222,10 +223,6 @@ module Fastlane
         else
           UI.user_error("File type of '#{config_file}' was not recognised. This should be .xml for Android and .plist for Cococa")
         end
-      end
-
-      def self.default_info_plist_path
-        Dir.glob("./{ios/,}*/Info.plist").reject {|path| path =~ /build|test/i }.sort.first
       end
 
       def self.load_options_from_plist file_path
