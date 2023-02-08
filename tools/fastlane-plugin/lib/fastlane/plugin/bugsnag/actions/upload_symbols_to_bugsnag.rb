@@ -1,5 +1,3 @@
-require_relative "find_info_plist_path"
-
 module Fastlane
   module Actions
     class UploadSymbolsToBugsnagAction < Action
@@ -133,11 +131,17 @@ module Fastlane
                                        env_name: "BUGSNAG_CONFIG_FILE",
                                        description: "Info.plist location",
                                        optional: true,
-                                       default_value: FindInfoPlist.default_info_plist_path)
+                                       default_value: default_info_plist_path)
         ]
       end
 
       private
+
+      def self.default_info_plist_path
+        # Find first 'Info.plist' in the current working directory
+        # ignoring any in 'build', or 'test' folders
+        return Dir.glob("./{ios/,}*/Info.plist").reject{|path| path =~ /build|test/i }.sort.first
+      end
 
       def self.options_from_info_plist file_path
         plist_getter = Fastlane::Actions::GetInfoPlistValueAction
