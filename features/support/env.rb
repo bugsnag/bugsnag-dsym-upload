@@ -24,7 +24,7 @@ def fastlane_upload_symbols(lane, dsym_path=nil, api_key=nil, config_file=nil, i
 
   Bundler.with_unbundled_env do
     Dir.chdir 'features/fixtures/fl-project' do
-      `BUGSNAG_ENDPOINT='http://localhost:#{MOCK_API_PORT}'\
+      `BUGSNAG_ENDPOINT='http://localhost:9339/sourcemap'\
        #{dsym_path_env} \
        #{api_key_env} \
        #{config_file_env} \
