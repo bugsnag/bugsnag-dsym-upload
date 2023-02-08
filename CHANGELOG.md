@@ -1,6 +1,6 @@
-## TBD
+## 2.3.0 (08-02-2023)
 
-## Bug fixes
+## Enhancements
 * Enable fastlane to report custom metadata when using `send_build_to_bugsnag` action.
   [#75](https://github.com/bugsnag/bugsnag-dsym-upload/pull/75)
 
