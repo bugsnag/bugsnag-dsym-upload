@@ -327,7 +327,7 @@ module Fastlane
           nil
         end
       end
-
+      
       def self.send_notification(url, body)
         require "net/http"
         uri = URI.parse(url)
