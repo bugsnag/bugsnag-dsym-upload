@@ -4,3 +4,10 @@ steps:
       docker-compose#v3.7.0:
         run: license_finder
     command: /bin/bash -lc '/scan/scripts/license_finder.sh'
+
+  - name: 'Run e2e tests'
+    agents:
+      queue: macos-12-arm
+    commands: 
+      - bundle install
+      - make test_features
