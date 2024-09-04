@@ -58,7 +58,7 @@ module Fastlane
       end
 
       def self.is_supported?(platform)
-        [:ios, :mac, :tvos].include?(platform)
+        [:ios, :mac, :tvos, :catalyst].include?(platform)
       end
 
       def self.available_options
