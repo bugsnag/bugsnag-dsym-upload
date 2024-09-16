@@ -1,3 +1,9 @@
+## 2.3.1 (04-09-2024)
+
+## Bug fixes
+* Add support for `catalyst` platform.
+  [#83](https://github.com/bugsnag/bugsnag-dsym-upload/issues/83)
+
 ## 2.3.0 (08-02-2023)
 
 ## Enhancements
