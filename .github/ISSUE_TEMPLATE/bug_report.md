@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-<!-- Before raising, please check if somebody else has already reported your issue. -->
+<!-- Before raising, please check whether somebody else has already reported your issue. -->
 
 ### Describe the bug
 A clear and concise description of what the bug is.
