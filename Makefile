@@ -16,7 +16,7 @@ $(MANDIR)/man1/$(PROJECT).1: man/$(PROJECT).pod
 	@pod2man --center $(PROJECT) --release $(VERSION) man/$(PROJECT).pod > $@
 	@chmod 444 $@
 
-.PHONY: bootstrap uninstall test test_unit test_features
+.PHONY: bootstrap uninstall test test_unit test_features download-cli
 
 install: $(BINDIR)/$(PROJECT) $(MANDIR)/man1/$(PROJECT).1
 
@@ -34,3 +34,6 @@ test_features:
 	@bundle exec maze-runner -c features/*.feature
 
 test: test_unit test_features
+
+download-cli:
+	./scripts/cli-download.sh
