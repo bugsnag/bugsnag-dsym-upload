@@ -133,7 +133,14 @@ module Fastlane
                                        env_name: "BUGSNAG_CONFIG_FILE",
                                        description: "Info.plist location",
                                        optional: true,
-                                       default_value: FindInfoPlist.default_info_plist_path)
+                                       default_value: FindInfoPlist.default_info_plist_path),
+          FastlaneCore::ConfigItem.new(key: :bugsnag_cli_path,
+                                       env_name: "BUGSNAG_CLI_PATH",
+                                       description: "Path to your bugsnag-cli. Defaults to `which bugsnag-cli`",
+                                       optional: true,
+                                       verify_block: proc do |value|
+                                         UI.user_error! "'#{value}' is not executable" unless FastlaneCore::Helper.executable?(value)
+                                       end)
         ]
       end
 
