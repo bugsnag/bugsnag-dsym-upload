@@ -30,7 +30,7 @@ task :build do
   # Clean up
   puts "Cleaning up temporary files..."
   rm File.join(gem_dir, 'LICENSE.txt')
-  rm File.join(gem_dir, 'bugsnag-dsym-upload')
+  rm_rf File.join(gem_dir, 'bin')
 end
 
 desc "Release the latest version to RubyGems"

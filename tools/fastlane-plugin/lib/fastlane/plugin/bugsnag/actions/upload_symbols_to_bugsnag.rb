@@ -1,13 +1,29 @@
 require_relative "find_info_plist_path"
+require 'os'
+require 'rbconfig'
+
 
 module Fastlane
   module Actions
     class UploadSymbolsToBugsnagAction < Action
+      def self.get_bugsnag_cli_path(params)
+        bundled_bugsnag_cli_path = self.bundled_bugsnag_cli_path
+        bundled_bugsnag_cli_version = Gem::Version.new(`#{bundled_bugsnag_cli_path} --version`.scan(/(?:\d+\.?){3}/).first)
 
-      UPLOAD_SCRIPT_PATH = File.expand_path(
-        File.join(File.dirname(__FILE__), '..', '..', '..', '..', '..', 'bugsnag-dsym-upload'))
+        bugsnag_cli_path = params[:bugsnag_cli_path] || bundled_bugsnag_cli_path
+
+        bugsnag_cli_version = Gem::Version.new(`#{bugsnag_cli_path} --version`.scan(/(?:\d+\.?){3}/).first)
+
+        if bugsnag_cli_version < bundled_bugsnag_cli_version
+          UI.user_error!("Your bugsnag-cli is outdated, please upgrade to at least version #{bundled_bugsnag_cli_version} and start your lane again!")
+        end
+
+        UI.success("Using bugsnag-cli #{bugsnag_cli_version}")
+        bugsnag_cli_path
+      end
 
       def self.run(params)
+        bugsnag_cli_path = get_bugsnag_cli_path(params)
         # If we have not explicitly set an API key through env, or parameter
         # input in Fastfile, find an API key in the Info.plist in config_file param
         api_key = params[:api_key]
@@ -28,8 +44,27 @@ module Fastlane
 
         parse_dsym_paths(params[:dsym_path]).each do |dsym_path|
           if dsym_path.end_with?(".zip") or File.directory?(dsym_path)
-            args = upload_args(dsym_path, params[:symbol_maps_path], params[:upload_url], params[:project_root], api_key, verbose, params[:ignore_missing_dwarf], params[:ignore_empty_dsym])
-            success = Kernel.system(UPLOAD_SCRIPT_PATH, *args)
+            args = upload_args(
+              dsym_path,
+              params[:upload_url],
+              params[:project_root],
+              api_key,
+              verbose,
+              params[:ignore_missing_dwarf],
+              params[:ignore_empty_dsym],
+              params[:dryrun],
+              params[:log_level],
+              params[:port],
+              params[:retries],
+              params[:timeout],
+              params[:configuration],
+              params[:scheme],
+              params[:config_file],
+              params[:xcode_project]
+            )
+            bugsnag_cli_command = "#{bugsnag_cli_path} upload dsym #{args.join(' ')}"
+            UI.message("Running command: #{bugsnag_cli_command}")
+            success = Kernel.system(bugsnag_cli_command)
             if success
               UI.success("Uploaded dSYMs in #{dsym_path}")
             else
@@ -129,14 +164,52 @@ module Fastlane
                                        optional: true,
                                        default_value: false,
                                        is_string: false),
+          FastlaneCore::ConfigItem.new(key: :dryrun,
+                                       env_name: "BUGSNAG_DRYRUN",
+                                       description: "Performs a dry-run of the command without sending any information to BugSnag",
+                                       optional: true,
+                                       default_value: false,
+                                       is_string: false),
+          FastlaneCore::ConfigItem.new(key: :log_level,
+                                       env_name: "BUGSNAG_LOG_LEVEL",
+                                       description: "Sets the level of logging to debug, info, warn or fatal",
+                                       optional: true),
+          FastlaneCore::ConfigItem.new(key: :port,
+                                       env_name: "BUGSNAG_PORT",
+                                       description: "The port number for the BugSnag upload server",
+                                       optional: true,
+                                       is_string: false),
+          FastlaneCore::ConfigItem.new(key: :retries,
+                                       env_name: "BUGSNAG_RETRIES",
+                                       description: "The number of retry attempts before failing an upload request",
+                                       optional: true,
+                                       is_string: false),
+          FastlaneCore::ConfigItem.new(key: :timeout,
+                                       env_name: "BUGSNAG_TIMEOUT",
+                                       description: "The number of seconds to wait before failing an upload request",
+                                       optional: true,
+                                       is_string: false),
+          FastlaneCore::ConfigItem.new(key: :configuration,
+                                       env_name: "BUGSNAG_CONFIGURATION",
+                                       description: "The configuration used to build the application",
+                                       optional: true),
+          FastlaneCore::ConfigItem.new(key: :scheme,
+                                       env_name: "BUGSNAG_SCHEME",
+                                       description: "The name of the Xcode options.Scheme used to build the application",
+                                       optional: true),
           FastlaneCore::ConfigItem.new(key: :config_file,
                                        env_name: "BUGSNAG_CONFIG_FILE",
                                        description: "Info.plist location",
                                        optional: true,
                                        default_value: FindInfoPlist.default_info_plist_path),
+          FastlaneCore::ConfigItem.new(key: :xcode_project,
+                                       env_name: "BUGSNAG_XCODE_PROJECT",
+                                       description: "The path to an Xcode project, workspace or containing directory from which to obtain build information",
+                                       optional: true,
+                                       default_value: Dir::pwd),
           FastlaneCore::ConfigItem.new(key: :bugsnag_cli_path,
                                        env_name: "BUGSNAG_CLI_PATH",
-                                       description: "Path to your bugsnag-cli. Defaults to `which bugsnag-cli`",
+                                       description: "Path to your bugsnag-cli",
                                        optional: true,
                                        verify_block: proc do |value|
                                          UI.user_error! "'#{value}' is not executable" unless FastlaneCore::Helper.executable?(value)
@@ -161,14 +234,23 @@ module Fastlane
         }
       end
 
-      def self.upload_args dir, symbol_maps_dir, upload_url, project_root, api_key, verbose, ignore_missing_dwarf, ignore_empty_dsym
-        args = [verbose ? "--verbose" : "--silent"]
+      def self.upload_args dir, upload_url, project_root, api_key, verbose, ignore_missing_dwarf, ignore_empty_dsym, dryrun, log_level, port, retries, timeout, configuration, scheme, plist, xcode_project
+        args = []
+        args += ["--verbose"] if verbose
         args += ["--ignore-missing-dwarf"] if ignore_missing_dwarf
         args += ["--ignore-empty-dsym"] if ignore_empty_dsym
         args += ["--api-key", api_key] unless api_key.nil?
-        args += ["--upload-server", upload_url] unless upload_url.nil?
-        args += ["--symbol-maps", symbol_maps_dir] unless symbol_maps_dir.nil?
+        args += ["--upload-api-root-url", upload_url] unless upload_url.nil?
         args += ["--project-root", project_root] unless project_root.nil?
+        args += ["--dry-run"] if dryrun
+        args += ["--log-level", log_level] unless log_level.nil?
+        args += ["--port", port] unless port.nil?
+        args += ["--retries", retries] unless retries.nil?
+        args += ["--timeout", timeout] unless timeout.nil?
+        args += ["--configuration", configuration] unless configuration.nil?
+        args += ["--scheme", scheme] unless scheme.nil?
+        args += ["--plist", plist] unless plist.nil?
+        args += ["--xcode-project", xcode_project] unless xcode_project.nil?
         args << dir
         args
       end
@@ -211,6 +293,36 @@ module Fastlane
         paths += coerce_array(Actions.lane_context[SharedValues::DSYM_OUTPUT_PATH]) if gym_dsyms?                     # set by `gym` Fastlane action
         paths += coerce_array(Actions.lane_context[SharedValues::DSYM_PATHS]) if download_dsym_dsyms?                 # set by `download_dsyms` Fastlane action
         parse_dsym_paths(paths.uniq)
+      end
+
+      def self.bundled_bugsnag_cli_path
+        host_cpu = RbConfig::CONFIG['host_cpu']
+        if OS.mac?
+          if host_cpu =~ /arm|aarch64/
+            self.bin_folder('arm64-macos-bugsnag-cli')
+          else
+            self.bin_folder('x86_64-macos-bugsnag-cli')
+          end
+        elsif OS.windows?
+          if OS.bits == 64
+            self.bin_folder('x86_64-windows-bugsnag-cli.exe')
+          else
+            self.bin_folder('i386-windows-bugsnag-cli.exe')
+          end
+        else
+          if host_cpu =~ /arm|aarch64/
+            self.bin_folder('arm64-linux-bugsnag-cli')
+          else if OS.bits == 64
+            self.bin_folder('x86_64-linux-bugsnag-cli')
+          else
+            self.bin_folder('i386-linux-bugsnag-cli')
+            end
+        end
+        end
+        end
+
+      def self.bin_folder(filename)
+        File.expand_path("../../../../../bin/#{filename}", File.dirname(__FILE__))
       end
     end
   end
