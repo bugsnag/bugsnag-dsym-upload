@@ -1,0 +1,3 @@
+[submodule "bugsnag-cli"]
+	path = bugsnag-cli
+	url = https://github.com/bugsnag/bugsnag-cli.git

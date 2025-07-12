@@ -3,9 +3,26 @@ task :build do
   # Copy required files into the gem
   puts "Assembling gem files..."
   gem_dir = File.dirname(__FILE__)
-  bin_file = File.join(gem_dir, '..', '..', 'bin', 'bugsnag-dsym-upload')
+  bugsnag_cli_dir = File.join(gem_dir, '..', '..', 'bugsnag-cli')
+  bin_dir = File.join(gem_dir, 'bin')
   license = File.join(gem_dir, '..', '..', 'LICENSE.txt')
-  cp bin_file, gem_dir
+
+  cd bugsnag_cli_dir do
+    puts "Building Bugsnag CLI binaries..."
+
+    system("make build-all")
+    raise "Failed to build Bugsnag CLI" unless $?.success?
+
+    puts "Copying Bugsnag CLI binary..."
+    FileUtils.mkdir_p(bin_dir)
+    Dir.glob(File.join(bugsnag_cli_dir, 'bin', '*')).each do |file|
+      next if File.directory?(file) # Skip directories
+      dest_file = File.join(bin_dir, File.basename(file))
+      puts "Copying #{file} to #{dest_file}"
+      FileUtils.cp(file, dest_file)
+    end
+  end
+
   cp license, gem_dir
 
   system("gem build fastlane-plugin-bugsnag.gemspec")
