@@ -8,13 +8,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby-version: ['2.5']
-        os: [ubuntu-20.04, macos-13]
+        ruby-version: ['3.3']
+        os: [ubuntu-24.04, macos-15]
 
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: 1.24
 
     - uses: ruby/setup-ruby@v1
       with:

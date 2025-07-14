@@ -4,6 +4,8 @@ source 'https://rubygems.org'
 group :development do
 end
 
+gem 'webrick'
+
 # Any :test dependencies are ignored for license auditing purposes
 group :test do
   gem 'bugsnag-maze-runner', :git => 'https://github.com/bugsnag/maze-runner', :tag => 'v1.1.0'
