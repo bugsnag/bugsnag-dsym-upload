@@ -32,7 +32,7 @@ describe Action do
   describe '#run' do
     it 'UI.user_error when script fails' do
       expect(Fastlane::UI).to receive(:user_error!).with("Failed uploading #{File.join(FIXTURE_PATH, "ios_proj/Project")}")
-      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --project-root #{Dir::pwd} #{File.join(FIXTURE_PATH, "ios_proj/Project")}").and_return(false)
+      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --project-root #{Dir::pwd} \"#{File.join(FIXTURE_PATH, "ios_proj/Project")}\"").and_return(false)
       run_with({dsym_path: File.join(FIXTURE_PATH, "ios_proj/Project")})
     end
 
@@ -48,21 +48,21 @@ describe Action do
 
     it 'uploads a single .dSYM file' do
       directory = File.join(FIXTURE_PATH, 'dSYMs')
-      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --project-root #{Dir::pwd} #{directory}").and_return(true)
+      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --project-root #{Dir::pwd} \"#{directory}\"").and_return(true)
       run_with({dsym_path: File.join(FIXTURE_PATH, 'dSYMs/app.dSYM')})
     end
 
     it 'uploads a .zip of .dSYM files' do
       path = File.join(FIXTURE_PATH, 'files.zip')
-      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --project-root #{Dir::pwd} #{path}").and_return(true)
+      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --project-root #{Dir::pwd} \"#{path}\"").and_return(true)
       run_with({dsym_path: path})
     end
 
     it 'uploads multiple .zip files' do
       zip1 = File.join(FIXTURE_PATH, 'files.zip')
       zip2 = File.join(FIXTURE_PATH, 'more_files.zip')
-      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --project-root #{Dir::pwd} #{zip1}").and_return(true)
-      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --project-root #{Dir::pwd} #{zip2}").and_return(true)
+      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --project-root #{Dir::pwd} \"#{zip1}\"").and_return(true)
+      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --project-root #{Dir::pwd} \"#{zip2}\"").and_return(true)
       run_with({dsym_path: [zip1, zip2]})
     end
 
@@ -72,8 +72,8 @@ describe Action do
       dsym3 = File.join(FIXTURE_PATH, 'dSYMs/app2.dSYM')
       dsym4 = File.join(FIXTURE_PATH, 'stuff/app2.dSYM')
       directories = [File.join(FIXTURE_PATH, 'dSYMs'), File.join(FIXTURE_PATH, 'stuff')]
-      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --project-root #{Dir::pwd} #{directories[0]}").and_return(true)
-      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --project-root #{Dir::pwd} #{directories[1]}").and_return(true)
+      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --project-root #{Dir::pwd} \"#{directories[0]}\"").and_return(true)
+      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --project-root #{Dir::pwd} \"#{directories[1]}\"").and_return(true)
       run_with({dsym_path: [dsym1, dsym2, dsym3, dsym4]})
     end
 
@@ -81,32 +81,32 @@ describe Action do
       dsym1 = File.join(FIXTURE_PATH, 'dSYMs/app.dSYM')
       dsym2 = File.join(FIXTURE_PATH, 'dSYMs/app2.dSYM')
       directory = File.join(FIXTURE_PATH, 'dSYMs')
-      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --project-root #{Dir::pwd} #{directory}").and_return(true)
+      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --project-root #{Dir::pwd} \"#{directory}\"").and_return(true)
       run_with({dsym_path: [dsym1, dsym2]})
     end
 
     it 'accepts a project root argument' do
       root_path = "/test/test/test"
-      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --project-root #{root_path} #{FIXTURE_PATH}").and_return(true)
+      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --project-root #{root_path} \"#{FIXTURE_PATH}\"").and_return(true)
       run_with({dsym_path: FIXTURE_PATH, project_root: root_path})
     end
 
     it 'accepts an API key argument' do
       api_key = "123456789123456789001234567890FF"
-      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --api-key #{api_key} --project-root #{Dir::pwd} #{FIXTURE_PATH}").and_return(true)
+      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --api-key #{api_key} --project-root #{Dir::pwd} \"#{FIXTURE_PATH}\"").and_return(true)
       run_with({dsym_path: FIXTURE_PATH, api_key: api_key})
     end
 
     it 'accepts an API key argument with no project root' do
       api_key = "123456789012345678901234567890FF"
-      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --api-key #{api_key} --project-root #{Dir::pwd} #{FIXTURE_PATH}").and_return(true)
+      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --api-key #{api_key} --project-root #{Dir::pwd} \"#{FIXTURE_PATH}\"").and_return(true)
       run_with({dsym_path: FIXTURE_PATH, api_key: api_key, project_root: nil})
     end
 
     it 'uses default API key argument from plist' do
       root_path = "/test/test/test"
       api_key = "12345678901234567890123456789AAA" # Uses the API Key from ./spec/fixtures/ios_proj/FirstRealFolder/Info.plist
-      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --api-key #{api_key} --project-root #{root_path} --plist ./FirstRealFolder/Info.plist #{FIXTURE_PATH}").and_return(true)
+      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --api-key #{api_key} --project-root #{root_path} --plist ./FirstRealFolder/Info.plist \"#{FIXTURE_PATH}\"").and_return(true)
       Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
         run_with({dsym_path: FIXTURE_PATH, project_root: root_path})
       end
@@ -115,7 +115,7 @@ describe Action do
     it 'uses legacy API key argument from plist' do
       root_path = "/test/test/test"
       api_key = "12345678901234567890123456789BBB" # Uses the API Key from ./spec/fixtures/ios_proj_legacy/Project/Info.plist
-      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --api-key #{api_key} --project-root #{root_path} --plist ./Project/Info.plist #{FIXTURE_PATH}").and_return(true)
+      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --api-key #{api_key} --project-root #{root_path} --plist ./Project/Info.plist \"#{FIXTURE_PATH}\"").and_return(true)
       Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj_legacy')) do
         run_with({dsym_path: FIXTURE_PATH, project_root: root_path})
       end
@@ -125,7 +125,7 @@ describe Action do
       # The order of precedence is 1. option input, 2. env variable, 3. default or config file input (for api key only)
       # The API key in ./spec/fixtures/ios_proj_legacy/Project/Info.plist is 12345678912345678900123456789AAA.
       api_key = "12345678912345678900123456789CCC"
-      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --api-key #{api_key} --project-root #{File.join(FIXTURE_PATH, 'ios_proj')} --plist Project/Info.plist #{FIXTURE_PATH}").and_return(true)
+      expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --api-key #{api_key} --project-root #{File.join(FIXTURE_PATH, 'ios_proj')} --plist Project/Info.plist \"#{FIXTURE_PATH}\"").and_return(true)
       Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
         run_with({dsym_path: FIXTURE_PATH, api_key: api_key, config_file: File.join('Project', 'Info.plist')})
       end
@@ -142,7 +142,7 @@ describe Action do
 
     context 'using a private server' do
       it 'uploads to the private server' do
-        expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --upload-api-root-url http://myserver.example.com --project-root #{Dir::pwd} #{FIXTURE_PATH}").and_return(true)
+        expect(Kernel).to receive(:system).with("#{BUGSNAG_CLI_PATH} upload dsym --upload-api-root-url http://myserver.example.com --project-root #{Dir::pwd} \"#{FIXTURE_PATH}\"").and_return(true)
         run_with({dsym_path: FIXTURE_PATH, upload_url: "http://myserver.example.com"})
       end
     end

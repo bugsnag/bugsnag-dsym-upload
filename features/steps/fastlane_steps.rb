@@ -32,3 +32,15 @@ end
 Then("the exit status should be {int}") do |int|
   assert_equal(int, $?.exitstatus)
 end
+
+Then('the sourcemap is valid for the dSYM Build API') do
+  steps %(
+    And the sourcemap payload field "apiKey" is not null
+  )
+end
+
+Then('the sourcemaps Content-Type header is valid multipart form-data') do
+  expected = /^multipart\/form-data; boundary=([^;]+)/
+  actual = Maze::Server.sourcemaps.current[:request]['content-type']
+  Maze.check.match(expected, actual)
+end
