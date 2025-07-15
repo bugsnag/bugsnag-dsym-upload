@@ -45,7 +45,7 @@ module Fastlane
         parse_dsym_paths(params[:dsym_path]).each do |dsym_path|
           if dsym_path.end_with?(".zip") or File.directory?(dsym_path)
             args = upload_args(
-              dsym_path,
+              "\"#{dsym_path}\"",
               params[:upload_url],
               params[:project_root],
               api_key,
