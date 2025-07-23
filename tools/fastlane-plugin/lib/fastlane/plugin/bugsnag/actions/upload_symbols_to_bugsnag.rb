@@ -10,20 +10,24 @@ module Fastlane
         bundled_bugsnag_cli_path = self.bundled_bugsnag_cli_path
         bundled_bugsnag_cli_version = Gem::Version.new(`#{bundled_bugsnag_cli_path} --version`.scan(/(?:\d+\.?){3}/).first)
 
-        bugsnag_cli_path = params[:bugsnag_cli_path] || bundled_bugsnag_cli_path
+        if params[:bugsnag_cli_path]
+          bugsnag_cli_path = params[:bugsnag_cli_path] || bundled_bugsnag_cli_path
 
-        bugsnag_cli_version = Gem::Version.new(`#{bugsnag_cli_path} --version`.scan(/(?:\d+\.?){3}/).first)
+          bugsnag_cli_version = Gem::Version.new(`#{bugsnag_cli_path} --version`.scan(/(?:\d+\.?){3}/).first)
 
-        if bugsnag_cli_version < bundled_bugsnag_cli_version
-          UI.user_error!("Your bugsnag-cli is outdated, please upgrade to at least version #{bundled_bugsnag_cli_version} and start your lane again!")
+          if bugsnag_cli_version < bundled_bugsnag_cli_version
+            UI.user_error!("Your bugsnag-cli is outdated, please upgrade to at least version #{bundled_bugsnag_cli_version} and start your lane again!")
+          end
+          bugsnag_cli_path
+        else
+          bundled_bugsnag_cli_path
         end
-
-        UI.success("Using bugsnag-cli #{bugsnag_cli_version}")
-        bugsnag_cli_path
       end
 
       def self.run(params)
         bugsnag_cli_path = get_bugsnag_cli_path(params)
+        UI.verbose("Using bugsnag-cli from path: #{bugsnag_cli_path}")
+
         # If we have not explicitly set an API key through env, or parameter
         # input in Fastfile, find an API key in the Info.plist in config_file param
         api_key = params[:api_key]
@@ -63,7 +67,7 @@ module Fastlane
               params[:xcode_project]
             )
             bugsnag_cli_command = "#{bugsnag_cli_path} upload dsym #{args.join(' ')}"
-            UI.message("Running command: #{bugsnag_cli_command}")
+            UI.verbose("Running command: #{bugsnag_cli_command}")
             success = Kernel.system(bugsnag_cli_command)
             if success
               UI.success("Uploaded dSYMs in #{dsym_path}")
