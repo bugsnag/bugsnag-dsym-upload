@@ -146,5 +146,18 @@ describe Action do
         run_with({dsym_path: FIXTURE_PATH, upload_url: "http://myserver.example.com"})
       end
     end
+
+    it 'accepts a custom bugsnag_cli_path as an option' do
+      custom_cli_path = File.join(ENV['HOME'], ".local/bugsnag/bin/bugsnag-cli")
+      expect(Kernel).to receive(:system).with("#{custom_cli_path} upload dsym --project-root #{Dir::pwd} \"#{FIXTURE_PATH}\"").and_return(true)
+      run_with({dsym_path: FIXTURE_PATH, bugsnag_cli_path: custom_cli_path})
+    end
+
+    it 'accepts a custom bugsnag_cli_path with an API key' do
+      custom_cli_path = File.join(ENV['HOME'], ".local/bugsnag/bin/bugsnag-cli")
+      api_key = "123456789012345678901234567890FF"
+      expect(Kernel).to receive(:system).with("#{custom_cli_path} upload dsym --api-key #{api_key} --project-root #{Dir::pwd} \"#{FIXTURE_PATH}\"").and_return(true)
+      run_with({dsym_path: FIXTURE_PATH, api_key: api_key, bugsnag_cli_path: custom_cli_path})
+    end
   end
 end

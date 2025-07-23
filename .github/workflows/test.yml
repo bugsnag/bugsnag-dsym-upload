@@ -36,6 +36,7 @@ jobs:
 
     - name: run specs
       run: |
+        curl -o- https://raw.githubusercontent.com/bugsnag/bugsnag-cli/main/install.sh | bash
         bundle config path vendor/fastlane-bundle
         bundle install --gemfile=tools/fastlane-plugin/Gemfile
         cd tools/fastlane-plugin
