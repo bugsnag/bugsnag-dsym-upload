@@ -16,7 +16,7 @@ module Fastlane
           bugsnag_cli_version = Gem::Version.new(`#{bugsnag_cli_path} --version`.scan(/(?:\d+\.?){3}/).first)
 
           if bugsnag_cli_version < bundled_bugsnag_cli_version
-            UI.user_error!("Your bugsnag-cli is outdated, please upgrade to at least version #{bundled_bugsnag_cli_version} and start your lane again!")
+            UI.warning("Your bugsnag-cli is outdated. The current bugsnag-cli version is: #{bundled_bugsnag_cli_version}")
           end
           bugsnag_cli_path
         else

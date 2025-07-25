@@ -159,5 +159,30 @@ describe Action do
       expect(Kernel).to receive(:system).with("#{custom_cli_path} upload dsym --api-key #{api_key} --project-root #{Dir::pwd} \"#{FIXTURE_PATH}\"").and_return(true)
       run_with({dsym_path: FIXTURE_PATH, api_key: api_key, bugsnag_cli_path: custom_cli_path})
     end
+
+    it 'logs a warning when using an outdated CLI version' do
+      cli_path = File.join(FIXTURE_PATH, 'dummy_bugsnag_cli.sh')
+      bundled_bugsnag_cli_version = `#{BUGSNAG_CLI_PATH} --version`.strip
+      allow(Fastlane::Actions::UploadSymbolsToBugsnagAction).to receive(:version_from_cli).and_return("1.0.0")
+      allow(Fastlane::Actions::UploadSymbolsToBugsnagAction).to receive(:bundled_bugsnag_cli_version).and_return(bundled_bugsnag_cli_version)
+
+      expect(Fastlane::UI).to receive(:warning).with("Your bugsnag-cli is outdated. The current bugsnag-cli version is: #{bundled_bugsnag_cli_version}")
+      expect(Kernel).to receive(:system).with("#{cli_path} upload dsym --project-root #{Dir::pwd} \"#{FIXTURE_PATH}\"").and_return(true)
+
+      run_with({dsym_path: FIXTURE_PATH, bugsnag_cli_path: cli_path})
+    end
+
+    it 'logs doesnt log a  warning when using an newer CLI version' do
+      cli_version = "9.9.9"
+      cli_path = File.join(FIXTURE_PATH, 'dummy_bugsnag_cli.sh')
+      bundled_bugsnag_cli_version = `#{BUGSNAG_CLI_PATH} --version`.strip
+      allow(Fastlane::Actions::UploadSymbolsToBugsnagAction).to receive(:version_from_cli).and_return(cli_version)
+      allow(Fastlane::Actions::UploadSymbolsToBugsnagAction).to receive(:bundled_bugsnag_cli_version).and_return(bundled_bugsnag_cli_version)
+
+      expect(Fastlane::UI).not_to receive(:warning)
+
+      ENV['BUGSNAG_CLI_VERSION'] = cli_version
+      run_with({dsym_path: FIXTURE_PATH, bugsnag_cli_path: cli_path})
+    end
   end
 end
