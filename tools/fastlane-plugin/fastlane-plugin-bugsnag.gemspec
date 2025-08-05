@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.homepage      = "https://github.com/bugsnag/bugsnag-dsym-upload"
   spec.license       = "MIT"
 
-  spec.files         = Dir["lib/**/*"] + Dir['bin/*'] + %w(LICENSE.txt)
+  spec.files         = Dir["{bin,lib}/**/*"] + %w(LICENSE.txt)
   spec.require_paths = ['lib']
   spec.test_files    = Dir["spec/**/*"]
 

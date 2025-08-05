@@ -8,11 +8,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby-version: ['2.5']
-        os: [ubuntu-20.04, macos-13]
+        ruby-version: ['3.3']
+        os: [ubuntu-24.04, macos-13]
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: 1.24
 
     - uses: ruby/setup-ruby@v1
       with:
@@ -29,6 +36,7 @@ jobs:
 
     - name: run specs
       run: |
+        curl -o- https://raw.githubusercontent.com/bugsnag/bugsnag-cli/main/install.sh | bash
         bundle config path vendor/fastlane-bundle
         bundle install --gemfile=tools/fastlane-plugin/Gemfile
         cd tools/fastlane-plugin

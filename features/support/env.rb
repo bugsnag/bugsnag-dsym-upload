@@ -21,10 +21,9 @@ def fastlane_upload_symbols(lane, dsym_path=nil, api_key=nil, config_file=nil, i
   dsym_path_env = "BUGSNAG_DSYM_PATH='#{dsym_path}'" unless dsym_path.nil?
   ignore_empty_dsym_env = "BUGSNAG_IGNORE_EMPTY_DSYM='#{ignore_empty_dsym}'" unless ignore_empty_dsym.nil?
   ignore_missing_dwarf_env = "BUGSNAG_IGNORE_MISSING_DWARF='#{ignore_missing_dwarf}'" unless ignore_missing_dwarf.nil?
-
   Bundler.with_unbundled_env do
     Dir.chdir 'features/fixtures/fl-project' do
-      `BUGSNAG_ENDPOINT='http://localhost:#{MOCK_API_PORT}'\
+      `BUGSNAG_ENDPOINT='http://localhost:9339' \
        #{dsym_path_env} \
        #{api_key_env} \
        #{config_file_env} \
