@@ -19,11 +19,10 @@ class BundledCli
     else
       if host_cpu =~ /arm|aarch64/
         self.bin_folder('arm64-linux-bugsnag-cli')
-      else if OS.bits == 64
-             self.bin_folder('x86_64-linux-bugsnag-cli')
-           else
-             self.bin_folder('i386-linux-bugsnag-cli')
-           end
+      elsif OS.bits == 64
+        self.bin_folder('x86_64-linux-bugsnag-cli')
+      else
+        self.bin_folder('i386-linux-bugsnag-cli')
       end
     end
   end

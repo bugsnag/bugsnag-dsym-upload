@@ -1,7 +1,8 @@
 require 'spec_helper'
+require_relative '../lib/fastlane/plugin/bugsnag/actions/bundled_cli_path'
 
 Action = Fastlane::Actions::UploadSymbolsToBugsnagAction
-BUGSNAG_CLI_PATH = Action::bundled_bugsnag_cli_path
+BUGSNAG_CLI_PATH = BundledCli.get_path
 
 describe Action do
   def run_with args
