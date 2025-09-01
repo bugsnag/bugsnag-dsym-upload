@@ -1,15 +1,34 @@
 require "xmlsimple"
 require "json"
 require_relative "find_info_plist_path"
+require_relative "bundled_cli_path"
 
 module Fastlane
   module Actions
     class SendBuildToBugsnagAction < Action
+      def self.get_bugsnag_cli_path(params)
+        bundled_bugsnag_cli_path = BundledCli.get_path
+        bundled_bugsnag_cli_version = Gem::Version.new(`#{bundled_bugsnag_cli_path} --version`.scan(/(?:\d+\.?){3}/).first)
 
-      BUILD_TOOL = "bugsnag-fastlane-plugin"
+        if params[:bugsnag_cli_path]
+          bugsnag_cli_path = params[:bugsnag_cli_path] || bundled_bugsnag_cli_path
+
+          bugsnag_cli_version = Gem::Version.new(`#{bugsnag_cli_path} --version`.scan(/(?:\d+\.?){3}/).first)
+
+          if bugsnag_cli_version < bundled_bugsnag_cli_version
+            UI.warning("Your bugsnag-cli is outdated. The current bugsnag-cli version is: #{bundled_bugsnag_cli_version}")
+          end
+          bugsnag_cli_path
+        else
+          bundled_bugsnag_cli_path
+        end
+      end
 
       def self.run(params)
-        payload = {buildTool: BUILD_TOOL, sourceControl: {}}
+        bugsnag_cli_path = get_bugsnag_cli_path(params)
+        UI.verbose("Using bugsnag-cli from path: #{bugsnag_cli_path}")
+
+        payload = {}
 
         # If a configuration file was found or was specified, load in the options:
         if params[:config_file]
@@ -19,35 +38,41 @@ module Fastlane
           # for each of the config options, if it's not been overriden by any
           # input to the lane, write it to the payload:
           payload[:apiKey] = params[:api_key] || config_options[:apiKey]
-          payload[:appVersion] = params[:app_version] || config_options[:appVersion]
-          payload[:appVersionCode] = params[:android_version_code] || config_options[:appVersionCode]
-          payload[:appBundleVersion] = params[:ios_bundle_version] || config_options[:appBundleVersion]
+          payload[:versionName] = params[:app_version] || config_options[:appVersion]
+          payload[:versionCode] = params[:android_version_code] || config_options[:appVersionCode]
+          payload[:bundleVersion] = params[:ios_bundle_version] || config_options[:appBundleVersion]
           payload[:releaseStage] = params[:release_stage] || config_options[:releaseStage] || "production"
         else
           # No configuration file was found or specified, use the input parameters:
           payload[:apiKey] = params[:api_key]
-          payload[:appVersion] = params[:app_version]
-          payload[:appVersionCode] = params[:android_version_code]
-          payload[:appBundleVersion] = params[:ios_bundle_version]
+          payload[:versionName] = params[:app_version]
+          payload[:versionCode] = params[:android_version_code]
+          payload[:bundleVersion] = params[:ios_bundle_version]
           payload[:releaseStage] = params[:release_stage] || "production"
         end
 
         # If builder, or source control information has been provided into
         # Fastlane, apply it to the payload here.
         payload[:builderName] = params[:builder] if params[:builder]
-        payload[:sourceControl][:revision] = params[:revision] if params[:revision]
-        payload[:sourceControl][:repository] = params[:repository] if params[:repository]
-        payload[:sourceControl][:provider] = params[:provider] if params[:provider]
+        payload[:revision] = params[:revision] if params[:revision]
+        payload[:repository] = params[:repository] if params[:repository]
+        payload[:provider] = params[:provider] if params[:provider]
+
+        payload[:autoAssignRelease] = params[:auto_assign_release] if params[:auto_assign_release]
 
         # If provided apply metadata to payload.
         payload[:metadata] = params[:metadata]
+
+        payload[:retries] = params[:retries] if params[:retries]
+        payload[:timeout] = params[:timeout] if params[:timeout]
+        payload[:buildApiRootUrl] = params[:endpoint] if params[:endpoint]
 
         payload.reject! {|k,v| v == nil || (v.is_a?(Hash) && v.empty?)}
 
         if payload[:apiKey].nil? || !payload[:apiKey].is_a?(String)
           UI.user_error! missing_api_key_message(params)
         end
-        if payload[:appVersion].nil?
+        if payload[:versionName].nil?
           UI.user_error! missing_app_version_message(params)
         end
 
@@ -57,7 +82,7 @@ module Fastlane
           UI.verbose("  #{param[0].to_s.rjust(18)}: #{param[1]}")
         end
 
-        send_notification(params[:endpoint], ::JSON.dump(payload))
+        send_notification(bugsnag_cli_path, ::JSON.dump(payload))
       end
 
       def self.missing_api_key_message(params)
@@ -146,6 +171,11 @@ module Fastlane
           FastlaneCore::ConfigItem.new(key: :release_stage,
                                        description: "Release stage being built, i.e. staging, production",
                                        optional: true),
+          FastlaneCore::ConfigItem.new(key: :auto_assign_release,
+                                       description: "Whether to automatically associate this build with any new error events and sessions that are received for",
+                                       optional: true,
+                                       default_value: false,
+                                       is_string: false),
           FastlaneCore::ConfigItem.new(key: :builder,
                                        description: "The name of the entity triggering the build",
                                        optional: true,
@@ -175,8 +205,23 @@ module Fastlane
           FastlaneCore::ConfigItem.new(key: :metadata,
                                        description: "Metadata",
                                        optional:true,
-                                       type: Object, 
-                                       default_value: nil)
+                                       type: Object,
+                                       default_value: nil),
+          FastlaneCore::ConfigItem.new(key: :retries,
+                                       description: "The number of retry attempts before failing an upload request",
+                                       optional: true,
+                                       is_string: false),
+          FastlaneCore::ConfigItem.new(key: :timeout,
+                                       description: "The number of seconds to wait before failing an upload request",
+                                       optional: true,
+                                       is_string: false),
+          FastlaneCore::ConfigItem.new(key: :bugsnag_cli_path,
+                                       env_name: "BUGSNAG_CLI_PATH",
+                                       description: "Path to your bugsnag-cli",
+                                       optional: true,
+                                       verify_block: proc do |value|
+                                         UI.user_error! "'#{value}' is not executable" unless FastlaneCore::Helper.executable?(value)
+                                       end)
         ]
       end
 
@@ -324,35 +369,36 @@ module Fastlane
           nil
         end
       end
-      
-      def self.send_notification(url, body)
-        require "net/http"
-        uri = URI.parse(url)
-        http = Net::HTTP.new(uri.host, uri.port)
-        http.read_timeout = 15
-        http.open_timeout = 15
 
-        http.use_ssl = uri.scheme == "https"
+      def self.to_kebab_case(str)
+      str.gsub(/([a-z])([A-Z])/, '\1-\2').downcase
+      end
 
-        uri.path == "" ? "/" : uri.path
-        request = Net::HTTP::Post.new(uri, {"Content-Type" => "application/json"})
-        request.body = body
-        begin
-          response = http.request(request)
-        rescue => e
-          UI.user_error! "Failed to notify Bugsnag of a new build: #{e}"
-        end
-        if body = parse_response_body(response)
-          if body.has_key? "errors"
-            errors = body["errors"].map {|error| "\n  * #{error}"}.join
-            UI.user_error! "The following errors occurred while notifying Bugsnag:#{errors}.\n\nPlease update your lane config and retry."
-          elsif response.code != "200"
-            UI.user_error! "Failed to notify Bugsnag of a new build. Please retry. HTTP status code: #{response.code}"
+      def self.json_to_cli_args(json_payload)
+        data = JSON.parse(json_payload)
+
+        data.map do |k, v|
+          key = to_kebab_case(k)
+          if v.is_a?(Hash)
+            # Convert nested hash into key=value pairs joined by commas
+            nested = v.map { |nk, nv| "#{to_kebab_case(nk)}=#{nv}" }.join(",")
+            "--#{key}=#{nested}"
+          else
+            "--#{key}=#{v}"
           end
-          if body.has_key? "warnings"
-            warnings = body["warnings"].map {|warn| "\n  * #{warn}"}.join
-            UI.important "Sending the build to Bugsnag succeeded with the following warnings:#{warnings}\n\nPlease update your lane config."
-          end
+        end.join(" ")
+      end
+
+      def self.send_notification(cli_path, body)
+        args = self.json_to_cli_args(body)
+        bugsnag_cli_command = "#{cli_path} create-build #{args}"
+
+        UI.verbose("Running command: #{bugsnag_cli_command}")
+        success = Kernel.system(bugsnag_cli_command)
+        if success
+          UI.success("Build successfully sent to Bugsnag")
+        else
+          UI.user_error!("Failed to send build to Bugsnag.")
         end
       end
     end

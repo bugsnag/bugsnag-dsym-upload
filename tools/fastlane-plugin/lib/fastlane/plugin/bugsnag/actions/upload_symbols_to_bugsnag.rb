@@ -1,13 +1,12 @@
 require_relative "find_info_plist_path"
-require 'os'
-require 'rbconfig'
+require_relative "bundled_cli_path"
 
 
 module Fastlane
   module Actions
     class UploadSymbolsToBugsnagAction < Action
       def self.get_bugsnag_cli_path(params)
-        bundled_bugsnag_cli_path = self.bundled_bugsnag_cli_path
+        bundled_bugsnag_cli_path = BundledCli.get_path
         bundled_bugsnag_cli_version = Gem::Version.new(`#{bundled_bugsnag_cli_path} --version`.scan(/(?:\d+\.?){3}/).first)
 
         if params[:bugsnag_cli_path]
@@ -290,36 +289,6 @@ module Fastlane
         paths += coerce_array(Actions.lane_context[SharedValues::DSYM_OUTPUT_PATH]) if gym_dsyms?                     # set by `gym` Fastlane action
         paths += coerce_array(Actions.lane_context[SharedValues::DSYM_PATHS]) if download_dsym_dsyms?                 # set by `download_dsyms` Fastlane action
         parse_dsym_paths(paths.uniq)
-      end
-
-      def self.bundled_bugsnag_cli_path
-        host_cpu = RbConfig::CONFIG['host_cpu']
-        if OS.mac?
-          if host_cpu =~ /arm|aarch64/
-            self.bin_folder('arm64-macos-bugsnag-cli')
-          else
-            self.bin_folder('x86_64-macos-bugsnag-cli')
-          end
-        elsif OS.windows?
-          if OS.bits == 64
-            self.bin_folder('x86_64-windows-bugsnag-cli.exe')
-          else
-            self.bin_folder('i386-windows-bugsnag-cli.exe')
-          end
-        else
-          if host_cpu =~ /arm|aarch64/
-            self.bin_folder('arm64-linux-bugsnag-cli')
-          else if OS.bits == 64
-            self.bin_folder('x86_64-linux-bugsnag-cli')
-          else
-            self.bin_folder('i386-linux-bugsnag-cli')
-            end
-        end
-        end
-        end
-
-      def self.bin_folder(filename)
-        File.expand_path("../../../../../bin/#{filename}", File.dirname(__FILE__))
       end
     end
   end
