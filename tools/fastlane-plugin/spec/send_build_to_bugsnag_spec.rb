@@ -16,10 +16,10 @@ describe BuildAction do
   context 'building an iOS project' do
     it 'detects default Info.plist file excluding test dirs' do
       expect(BuildAction).to receive(:send_notification) do |cli_path, body|
-        payload = ::JSON.load(body)
-        expect(payload['versionName']).to eq '2.0-other'
-        expect(payload['bundleVersion']).to eq '22'
-        expect(payload['apiKey']).to eq '12345678901234567890123456789AAA'
+        args = ::JSON.load(body)
+        expect(args['versionName']).to eq '2.0-other'
+        expect(args['bundleVersion']).to eq '22'
+        expect(args['apiKey']).to eq '12345678901234567890123456789AAA'
       end
 
       Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
@@ -30,11 +30,11 @@ describe BuildAction do
     it 'reads api key from legacy location' do
       # the API key is now in `bugsnag.apiKey`, it used to be in 'BugsnagAPIKey',
       # test this can be extracted correctly from the `ios_proj_legacy`
-      expect(BuildAction).to receive(:send_notification) do |url, body|
-        payload = ::JSON.load(body)
-        expect(payload['versionName']).to eq '4.0-project'
-        expect(payload['bundleVersion']).to eq '44'
-        expect(payload['apiKey']).to eq '12345678901234567890123456789BBB'
+      expect(BuildAction).to receive(:send_notification) do |cli_path, body|
+        args = ::JSON.load(body)
+        expect(args['versionName']).to eq '4.0-project'
+        expect(args['bundleVersion']).to eq '44'
+        expect(args['apiKey']).to eq '12345678901234567890123456789BBB'
       end
 
       Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj_legacy')) do
@@ -45,9 +45,9 @@ describe BuildAction do
     context 'using default config_file option' do
       context 'override API key from config' do
         it 'reads API key from the api_key option' do
-          expect(BuildAction).to receive(:send_notification) do |url, body|
-            payload = ::JSON.load(body)
-            expect(payload['apiKey']).to eq '12345678901234567890123456789FFF'
+          expect(BuildAction).to receive(:send_notification) do |cli_path, body|
+            args = ::JSON.load(body)
+            expect(args['apiKey']).to eq '12345678901234567890123456789FFF'
           end
 
           Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
@@ -58,10 +58,10 @@ describe BuildAction do
         end
 
         it 'uses input versions from options' do
-          expect(BuildAction).to receive(:send_notification) do |url, body|
-            payload = ::JSON.load(body)
-            expect(payload['versionName']).to eq '8.0.0'
-            expect(payload['bundleVersion']).to eq '800'
+          expect(BuildAction).to receive(:send_notification) do |cli_path, body|
+            args = ::JSON.load(body)
+            expect(args['versionName']).to eq '8.0.0'
+            expect(args['bundleVersion']).to eq '800'
           end
 
           Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
@@ -76,11 +76,11 @@ describe BuildAction do
 
     context 'override config_file option' do
       it 'reads API key and version info from the config file' do
-        expect(BuildAction).to receive(:send_notification) do |url, body|
-          payload = ::JSON.load(body)
-          expect(payload['versionName']).to eq '3.0-project'
-          expect(payload['bundleVersion']).to eq '33'
-          expect(payload['apiKey']).to eq '12345678901234567890123456789DDD'
+        expect(BuildAction).to receive(:send_notification) do |cli_path, body|
+          args = ::JSON.load(body)
+          expect(args['versionName']).to eq '3.0-project'
+          expect(args['bundleVersion']).to eq '33'
+          expect(args['apiKey']).to eq '12345678901234567890123456789DDD'
         end
 
         Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
@@ -92,11 +92,11 @@ describe BuildAction do
 
       context 'override API key, and config file' do
         it 'uses the input api_key to override a non default config' do
-          expect(BuildAction).to receive(:send_notification) do |url, body|
-            payload = ::JSON.load(body)
-            expect(payload['versionName']).to eq '3.0-project'
-            expect(payload['bundleVersion']).to eq '33'
-            expect(payload['apiKey']).to eq '12345678901234567890123456789EEE'
+          expect(BuildAction).to receive(:send_notification) do |cli_path, body|
+            args = ::JSON.load(body)
+            expect(args['versionName']).to eq '3.0-project'
+            expect(args['bundleVersion']).to eq '33'
+            expect(args['apiKey']).to eq '12345678901234567890123456789EEE'
           end
 
           Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
@@ -108,11 +108,11 @@ describe BuildAction do
         end
 
         it 'uses the input versions to override a non default config' do
-          expect(BuildAction).to receive(:send_notification) do |url, body|
-            payload = ::JSON.load(body)
-            expect(payload['versionName']).to eq '9.0.0'
-            expect(payload['bundleVersion']).to eq '900'
-            expect(payload['apiKey']).to eq '12345678901234567890123456789DDD'
+          expect(BuildAction).to receive(:send_notification) do |cli_path, body|
+            args = ::JSON.load(body)
+            expect(args['versionName']).to eq '9.0.0'
+            expect(args['bundleVersion']).to eq '900'
+            expect(args['apiKey']).to eq '12345678901234567890123456789DDD'
           end
 
           Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
@@ -126,13 +126,13 @@ describe BuildAction do
       end
     end
 
-    context 'metadata added to payload' do
+    context 'metadata added to args' do
       it "single key:value pair added" do
-        expect(BuildAction).to receive(:send_notification) do |url, body|
-          payload = ::JSON.load(body)
-          expect(payload['versionName']).to eq '4.0-project'
-          expect(payload['apiKey']).to eq '12345678901234567890123456789DDD'
-          expect(payload['metadata']).to eq '"test1": "First test"'
+        expect(BuildAction).to receive(:send_notification) do |cli_path, body|
+          args = ::JSON.load(body)
+          expect(args['versionName']).to eq '4.0-project'
+          expect(args['apiKey']).to eq '12345678901234567890123456789DDD'
+          expect(args['metadata']).to eq '"test1": "First test"'
         end
 
         Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
@@ -145,11 +145,11 @@ describe BuildAction do
       end
 
       it "multiple key:value pairs added" do
-        expect(BuildAction).to receive(:send_notification) do |url, body|
-          payload = ::JSON.load(body)
-          expect(payload['versionName']).to eq '4.0-project'
-          expect(payload['apiKey']).to eq '12345678901234567890123456789DDD'
-          expect(payload['metadata']).to eq '"test1": "First test", "test2": "Second test", "test3": "Third test"'
+        expect(BuildAction).to receive(:send_notification) do |cli_path, body|
+          args = ::JSON.load(body)
+          expect(args['versionName']).to eq '4.0-project'
+          expect(args['apiKey']).to eq '12345678901234567890123456789DDD'
+          expect(args['metadata']).to eq '"test1": "First test", "test2": "Second test", "test3": "Third test"'
         end
 
         Dir.chdir(File.join(FIXTURE_PATH, 'ios_proj')) do
