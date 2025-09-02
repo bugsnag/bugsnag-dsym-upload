@@ -1,30 +1,12 @@
 require_relative "find_info_plist_path"
-require_relative "bundled_cli_path"
+require_relative "bugsnag_cli"
 
 
 module Fastlane
   module Actions
     class UploadSymbolsToBugsnagAction < Action
-      def self.get_bugsnag_cli_path(params)
-        bundled_bugsnag_cli_path = BundledCli.get_path
-        bundled_bugsnag_cli_version = Gem::Version.new(`#{bundled_bugsnag_cli_path} --version`.scan(/(?:\d+\.?){3}/).first)
-
-        if params[:bugsnag_cli_path]
-          bugsnag_cli_path = params[:bugsnag_cli_path] || bundled_bugsnag_cli_path
-
-          bugsnag_cli_version = Gem::Version.new(`#{bugsnag_cli_path} --version`.scan(/(?:\d+\.?){3}/).first)
-
-          if bugsnag_cli_version < bundled_bugsnag_cli_version
-            UI.warning("Your bugsnag-cli is outdated. The current bugsnag-cli version is: #{bundled_bugsnag_cli_version}")
-          end
-          bugsnag_cli_path
-        else
-          bundled_bugsnag_cli_path
-        end
-      end
-
       def self.run(params)
-        bugsnag_cli_path = get_bugsnag_cli_path(params)
+        bugsnag_cli_path = BugsnagCli.get_bugsnag_cli_path(params)
         UI.verbose("Using bugsnag-cli from path: #{bugsnag_cli_path}")
 
         # If we have not explicitly set an API key through env, or parameter

@@ -1,11 +1,11 @@
 require 'spec_helper'
 require 'json'
 require 'fastlane/actions/get_info_plist_value'
-require_relative '../lib/fastlane/plugin/bugsnag/actions/bundled_cli_path'
+require_relative '../lib/fastlane/plugin/bugsnag/actions/bugsnag_cli'
 
 
 BuildAction = Fastlane::Actions::SendBuildToBugsnagAction
-BUGSNAG_CLI_PATH = BundledCli.get_path
+BUGSNAG_CLI_PATH = BugsnagCli.get_bundled_path
 
 
 describe BuildAction do

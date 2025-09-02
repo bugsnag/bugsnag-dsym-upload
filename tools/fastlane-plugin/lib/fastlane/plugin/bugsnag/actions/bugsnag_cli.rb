@@ -1,8 +1,26 @@
 require 'os'
 require 'rbconfig'
 
-class BundledCli
-  def self.get_path
+class BugsnagCli
+  def self.get_bugsnag_cli_path(params)
+    bundled_bugsnag_cli_path = self.get_bundled_path
+    bundled_bugsnag_cli_version = Gem::Version.new(`#{bundled_bugsnag_cli_path} --version`.scan(/(?:\d+\.?){3}/).first)
+
+    if params[:bugsnag_cli_path]
+      bugsnag_cli_path = params[:bugsnag_cli_path] || bundled_bugsnag_cli_path
+
+      bugsnag_cli_version = Gem::Version.new(`#{bugsnag_cli_path} --version`.scan(/(?:\d+\.?){3}/).first)
+
+      if bugsnag_cli_version < bundled_bugsnag_cli_version
+        UI.warning("Your bugsnag-cli is outdated. The current bugsnag-cli version is: #{bundled_bugsnag_cli_version}")
+      end
+      bugsnag_cli_path
+    else
+      bundled_bugsnag_cli_path
+    end
+  end
+
+  def self.get_bundled_path
     host_cpu = RbConfig::CONFIG['host_cpu']
     if OS.mac?
       if host_cpu =~ /arm|aarch64/
