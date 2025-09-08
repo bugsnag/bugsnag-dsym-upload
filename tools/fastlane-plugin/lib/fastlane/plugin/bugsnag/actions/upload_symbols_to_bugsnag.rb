@@ -19,7 +19,7 @@ module Fastlane
 
         # If verbose flag is enabled (`--verbose`), display the plugin action debug info
         # Store the verbose flag for use in the upload arguments.
-        verbose = UI.verbose("Uploading dSYMs to Bugsnag with the following parameters:")
+        UI.verbose("Uploading dSYMs to Bugsnag with the following parameters:")
         rjust = 30 # set justification width for keys for the list of parameters to output
         params.values.each do |param|
           UI.verbose("  #{param[0].to_s.rjust(rjust)}: #{param[1]}")
@@ -29,12 +29,11 @@ module Fastlane
 
         parse_dsym_paths(params[:dsym_path]).each do |dsym_path|
           if dsym_path.end_with?(".zip") or File.directory?(dsym_path)
-            args = upload_args(
+            args = BugsnagCli.upload_args(
               "\"#{dsym_path}\"",
               params[:upload_url],
               params[:project_root],
               api_key,
-              verbose,
               params[:ignore_missing_dwarf],
               params[:ignore_empty_dsym],
               params[:dryrun],
@@ -212,26 +211,7 @@ module Fastlane
         }
       end
 
-      def self.upload_args dir, upload_url, project_root, api_key, verbose, ignore_missing_dwarf, ignore_empty_dsym, dryrun, log_level, port, retries, timeout, configuration, scheme, plist, xcode_project
-        args = []
-        args += ["--verbose"] if verbose
-        args += ["--ignore-missing-dwarf"] if ignore_missing_dwarf
-        args += ["--ignore-empty-dsym"] if ignore_empty_dsym
-        args += ["--api-key", api_key] unless api_key.nil?
-        args += ["--upload-api-root-url", upload_url] unless upload_url.nil?
-        args += ["--project-root", project_root] unless project_root.nil?
-        args += ["--dry-run"] if dryrun
-        args += ["--log-level", log_level] unless log_level.nil?
-        args += ["--port", port] unless port.nil?
-        args += ["--retries", retries] unless retries.nil?
-        args += ["--timeout", timeout] unless timeout.nil?
-        args += ["--configuration", configuration] unless configuration.nil?
-        args += ["--scheme", scheme] unless scheme.nil?
-        args += ["--plist", plist] unless plist.nil?
-        args += ["--xcode-project", xcode_project] unless xcode_project.nil?
-        args << dir
-        args
-      end
+
 
       # returns an array of unique dSYM-containing directory paths to upload
       def self.parse_dsym_paths dsym_path

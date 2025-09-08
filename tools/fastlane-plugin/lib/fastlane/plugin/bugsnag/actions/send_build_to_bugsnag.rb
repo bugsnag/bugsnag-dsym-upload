@@ -8,7 +8,6 @@ module Fastlane
     class SendBuildToBugsnagAction < Action
       def self.run(params)
         bugsnag_cli_path = BugsnagCli.get_bugsnag_cli_path(params)
-        verbose = UI.verbose("Using bugsnag-cli from path: #{bugsnag_cli_path}")
 
         # If a configuration file was found or was specified, load in the options:
         config_options = {}
@@ -40,7 +39,7 @@ module Fastlane
           UI.user_error! missing_app_version_message(params)
         end
 
-        args = create_build_args(
+        args = BugsnagCli.create_build_args(
           api_key,
           version_name,
           version_code,
@@ -54,8 +53,7 @@ module Fastlane
           metadata,
           retries,
           timeout,
-          endpoint,
-          verbose
+          endpoint
         )
         bugsnag_cli_command = "#{bugsnag_cli_path} create-build #{args.join(' ')}"
         UI.verbose("Running command: #{bugsnag_cli_command}")
@@ -65,34 +63,6 @@ module Fastlane
         else
           UI.user_error!("Failed to send build to Bugsnag.")
         end
-      end
-
-      def self.create_build_args(api_key, version_name, version_code, bundle_version, release_stage, builder, revision, repository, provider, auto_assign_release, metadata, retries, timeout, endpoint, verbose)
-        args = []
-        args += ["--api-key", api_key] unless api_key.nil?
-        args += ["--version-name", version_name] unless version_name.nil?
-        args += ["--version-code", version_code] unless version_code.nil?
-        args += ["--bundle-version", bundle_version] unless bundle_version.nil?
-        args += ["--release-stage", release_stage] unless release_stage.nil?
-        args += ["--builder-name", builder] unless builder.nil?
-        args += ["--revision", revision] unless revision.nil?
-        args += ["--repository", repository] unless repository.nil?
-        args += ["--provider", provider] unless provider.nil?
-        args += ["--auto-assign-release"] if auto_assign_release
-        unless metadata.nil?
-          if metadata.is_a?(String)
-            #
-            args += ["--metadata", metadata]
-          elsif metadata.is_a?(Hash)
-            formatted_metadata = metadata.map { |k, v| %Q{"#{k}"="#{v}"} }.join(",")
-            args += ["--metadata", formatted_metadata]
-          end
-        end
-        args += ["--retries", retries] unless retries.nil?
-        args += ["--timeout", timeout] unless timeout.nil?
-        args += ["--build-api-root-url", endpoint] unless endpoint.nil?
-        args += ["--verbose"] if verbose
-        args
       end
 
       def self.missing_api_key_message(params)
