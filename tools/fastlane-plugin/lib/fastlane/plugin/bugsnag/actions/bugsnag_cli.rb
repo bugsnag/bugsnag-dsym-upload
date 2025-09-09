@@ -99,6 +99,18 @@ class BugsnagCli
     args << dir
     args
   end
+
+  def self.upload_dsym cli_path, args
+    bugsnag_cli_command = "#{cli_path} upload dsym #{args.join(' ')}"
+    FastlaneCore::UI.verbose("Running command: #{bugsnag_cli_command}")
+    Kernel.system(bugsnag_cli_command)
+  end
+
+  def self.create_build cli_path, args
+    bugsnag_cli_command = "#{cli_path} create-build #{args.join(' ')}"
+    FastlaneCore::UI.verbose("Running command: #{bugsnag_cli_command}")
+    Kernel.system(bugsnag_cli_command)
+  end
 end
 
 

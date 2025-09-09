@@ -10,7 +10,7 @@ module Fastlane
         UI.verbose("Using bugsnag-cli from path: #{bugsnag_cli_path}")
 
         # If we have not explicitly set an API key through env, or parameter
-        # input in Fastfile, find an API key in the Info.plist in config_file param
+        # input in Fastfile, find an API key from the Info.plist in config_file param
         api_key = params[:api_key]
         if params[:config_file] && params[:api_key] == nil
           UI.message("Using the API Key from #{params[:config_file]}")
@@ -46,9 +46,7 @@ module Fastlane
               params[:config_file],
               params[:xcode_project]
             )
-            bugsnag_cli_command = "#{bugsnag_cli_path} upload dsym #{args.join(' ')}"
-            UI.verbose("Running command: #{bugsnag_cli_command}")
-            success = Kernel.system(bugsnag_cli_command)
+            success = BugsnagCli.upload_dsym bugsnag_cli_path, args
             if success
               UI.success("Uploaded dSYMs in #{dsym_path}")
             else

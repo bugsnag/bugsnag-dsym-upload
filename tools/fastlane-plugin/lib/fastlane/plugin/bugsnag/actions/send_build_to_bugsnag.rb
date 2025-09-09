@@ -55,9 +55,7 @@ module Fastlane
           timeout,
           endpoint
         )
-        bugsnag_cli_command = "#{bugsnag_cli_path} create-build #{args.join(' ')}"
-        UI.verbose("Running command: #{bugsnag_cli_command}")
-        success = Kernel.system(bugsnag_cli_command)
+        success = BugsnagCli.create_build bugsnag_cli_path, args
         if success
           UI.success("Build successfully sent to Bugsnag")
         else
