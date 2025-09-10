@@ -1,7 +1,8 @@
 require 'spec_helper'
+require_relative '../lib/fastlane/plugin/bugsnag/actions/bugsnag_cli'
 
 Action = Fastlane::Actions::UploadSymbolsToBugsnagAction
-BUGSNAG_CLI_PATH = Action::bundled_bugsnag_cli_path
+BUGSNAG_CLI_PATH = BugsnagCli.get_bundled_path
 
 describe Action do
   def run_with args
@@ -166,7 +167,7 @@ describe Action do
       allow(Fastlane::Actions::UploadSymbolsToBugsnagAction).to receive(:version_from_cli).and_return("1.0.0")
       allow(Fastlane::Actions::UploadSymbolsToBugsnagAction).to receive(:bundled_bugsnag_cli_version).and_return(bundled_bugsnag_cli_version)
 
-      expect(Fastlane::UI).to receive(:warning).with("Your bugsnag-cli is outdated. The current bugsnag-cli version is: #{bundled_bugsnag_cli_version}")
+      expect(Fastlane::UI).to receive(:warning).with("The installed bugsnag-cli at #{cli_path} is outdated (1.0.0). The current bundled version is: #{bundled_bugsnag_cli_version}. It is recommended that you either update your installed version or use the bundled version.")
       expect(Kernel).to receive(:system).with("#{cli_path} upload dsym --project-root #{Dir::pwd} \"#{FIXTURE_PATH}\"").and_return(true)
 
       run_with({dsym_path: FIXTURE_PATH, bugsnag_cli_path: cli_path})
