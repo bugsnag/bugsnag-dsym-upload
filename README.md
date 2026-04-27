@@ -2,6 +2,7 @@
 
 Commands for uploading files to Bugsnag via the Bugsnag Upload APIs
 
+## This package is now deprecated - please use [bugsnag-cli](https://github.com/bugsnag/bugsnag-cli) to report builds to Bugsnag and [fastlane-plugin-bugsnag](https://github.com/bugsnag/fastlane-plugin-bugsnag) for our Fastlane integration.
 
 ## Current Features
 
